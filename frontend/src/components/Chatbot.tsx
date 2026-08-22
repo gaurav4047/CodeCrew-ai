@@ -6,10 +6,10 @@ import {
   Maximize2,
   ChevronDown,
   ChevronUp,
-  Clock,
-  CheckCircle2,
   Workflow,
-  Brain
+  Brain,
+  Sparkles,
+  Bot
 } from 'lucide-react';
 
 interface AgentActivityItem {
@@ -47,14 +47,13 @@ const Chatbot: React.FC = () => {
     {
       role: 'assistant',
       content:
-        "Hello! I am your 360° AI Multi-Agent Intelligence Orchestrator with Context & Memory Management. Submit any query or topic—I will automatically retain context across conversation turns, query research papers, patent filings, news/social media, and competitor telemetry for you.",
+        "Hello! I am your Platform AI Assistant. Ask me anything about how to use the platform (Tracking, Research, Patents, Competitors, News, Trends, Reports) or ask any research topic inquiry—I will answer and retain context for you!",
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [expandedToolIndex, setExpandedToolIndex] = useState<number | null>(null);
-  const [loadingStep, setLoadingStep] = useState<string>('🧠 Retrieving context & memory...');
+  const [expandedTraceIndex, setExpandedTraceIndex] = useState<number | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -66,39 +65,18 @@ const Chatbot: React.FC = () => {
     scrollToBottom();
   }, [messages, isLoading]);
 
-  useEffect(() => {
-    let interval: any;
-    if (isLoading) {
-      const steps = [
-        '🧠 Memory Manager retrieving active topic context...',
-        '🤖 AI Orchestrator deploying 360° agent delegation...',
-        '🔬 Research Agent: Searching academic papers...',
-        '📜 Patent Agent: Checking IP filings...',
-        '📰 News & Social Agent: Monitoring media sentiment...',
-        '🏢 Competitor Agent: Analyzing market metrics...',
-        '💾 Updating short-term & persistent memory state...'
-      ];
-      let stepIdx = 0;
-      setLoadingStep(steps[0]);
-      interval = setInterval(() => {
-        stepIdx = (stepIdx + 1) % steps.length;
-        setLoadingStep(steps[stepIdx]);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isLoading]);
-
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+  const handleSendMessage = async (textToSend?: string) => {
+    const queryText = textToSend || inputValue;
+    if (!queryText.trim()) return;
 
     const userMessage: Message = {
       role: 'user',
-      content: inputValue,
+      content: queryText,
       timestamp: new Date()
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInputValue('');
+    if (!textToSend) setInputValue('');
     setIsLoading(true);
 
     try {
@@ -108,7 +86,7 @@ const Chatbot: React.FC = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          message: userMessage.content,
+          message: queryText,
           conversation_history: messages.map((m) => ({
             role: m.role,
             content: m.content
@@ -137,7 +115,7 @@ const Chatbot: React.FC = () => {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      let errorMessage = 'Sorry, I encountered an error processing your request.';
+      let errorMessage = 'Sorry, I encountered an error processing your question.';
       if (error instanceof Error) {
         errorMessage += ` (${error.message})`;
       }
@@ -161,53 +139,56 @@ const Chatbot: React.FC = () => {
     }
   };
 
-  const toggleToolExpand = (index: number) => {
-    setExpandedToolIndex((prev) => (prev === index ? null : index));
+  const toggleTraceExpand = (index: number) => {
+    setExpandedTraceIndex((prev) => (prev === index ? null : index));
   };
 
-  const suggestedQuestions = [
-    "Track AI medical diagnosis research and patents.",
-    "What are the latest updates?",
-    "Which competitors are involved?",
-    "Compare them with the research we found earlier."
+  const platformSuggestions = [
+    "How do I set up automated tracking for AI Medical Diagnosis?",
+    "Explain how Context Memory retains topics across turns.",
+    "What is the difference between Verified Facts and Social Signals?",
+    "Summarize recent research papers and competitor patents found."
   ];
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Chat Button (Bottom Right Corner) */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-4 rounded-full shadow-2xl hover:scale-105 transition-all z-50 flex items-center space-x-2"
-          title="Open 360° AI Assistant with Memory"
+          className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-4 py-3.5 rounded-full shadow-2xl hover:scale-105 transition-all z-50 flex items-center space-x-2.5 border border-white/20"
+          title="Open AI Platform Chatbot Assistant"
         >
-          <Brain className="w-6 h-6 animate-pulse text-purple-300" />
-          <span className="font-semibold text-sm pr-1">AI Agent & Memory</span>
+          <div className="p-1 bg-white/20 rounded-full">
+            <Bot className="w-5 h-5 text-cyan-300" />
+          </div>
+          <span className="font-semibold text-sm">AI Agent & Assistant</span>
+          <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping"></span>
         </button>
       )}
 
       {/* Main Chat Window */}
       {isOpen && (
         <div
-          className={`fixed bottom-6 right-6 w-[500px] max-w-[95vw] bg-white rounded-2xl shadow-2xl z-50 flex flex-col transition-all border border-gray-100 ${
-            isMinimized ? 'h-14 overflow-hidden' : 'h-[650px]'
+          className={`fixed bottom-6 right-6 w-[480px] max-w-[94vw] bg-white rounded-2xl shadow-2xl z-50 flex flex-col transition-all border border-slate-200 overflow-hidden ${
+            isMinimized ? 'h-14' : 'h-[620px]'
           }`}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white p-3.5 rounded-t-2xl flex items-center justify-between shadow-md">
+          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white p-3.5 flex items-center justify-between shadow-md">
             <div className="flex items-center space-x-2.5">
-              <div className="p-1.5 bg-purple-500/20 rounded-lg border border-purple-400/30">
-                <Brain className="w-5 h-5 text-purple-300 animate-pulse" />
+              <div className="p-1.5 bg-cyan-500/20 rounded-xl border border-cyan-400/30">
+                <Bot className="w-5 h-5 text-cyan-300 animate-pulse" />
               </div>
               <div>
                 <h3 className="font-semibold text-sm leading-none flex items-center gap-1.5">
-                  AI Agent with Context & Memory
-                  <span className="bg-purple-500/20 text-purple-200 text-[10px] px-2 py-0.5 rounded-full border border-purple-400/30 font-mono">
-                    Context Retained
+                  Platform AI Assistant
+                  <span className="bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full border border-emerald-400/30 font-mono">
+                    Online
                   </span>
                 </h3>
-                <p className="text-[11px] text-gray-300 mt-0.5">
-                  Short-Term & Persistent Long-Term Memory
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  Powered by Groq LLM & Context Memory Engine
                 </p>
               </div>
             </div>
@@ -215,14 +196,14 @@ const Chatbot: React.FC = () => {
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => setIsMinimized(!isMinimized)}
-                className="hover:bg-white/10 p-1.5 rounded-lg text-gray-300 hover:text-white transition-colors"
+                className="hover:bg-white/10 p-1.5 rounded-lg text-slate-300 hover:text-white transition-colors"
                 title={isMinimized ? "Maximize" : "Minimize"}
               >
                 {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="hover:bg-white/10 p-1.5 rounded-lg text-gray-300 hover:text-white transition-colors"
+                className="hover:bg-white/10 p-1.5 rounded-lg text-slate-300 hover:text-white transition-colors"
                 title="Close"
               >
                 <X className="w-4 h-4" />
@@ -233,7 +214,7 @@ const Chatbot: React.FC = () => {
           {!isMinimized && (
             <>
               {/* Message List */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
                 {messages.map((message, index) => (
                   <div
                     key={index}
@@ -242,15 +223,15 @@ const Chatbot: React.FC = () => {
                     }`}
                   >
                     <div
-                      className={`max-w-[92%] p-3.5 rounded-2xl shadow-sm ${
+                      className={`max-w-[90%] p-3.5 rounded-2xl shadow-xs ${
                         message.role === 'user'
                           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-none'
-                          : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none'
+                          : 'bg-white text-slate-900 border border-slate-200/80 rounded-bl-none'
                       }`}
                     >
-                      {/* Context / Memory Indicator Badge */}
+                      {/* Optional Context Memory Indicator */}
                       {message.role === 'assistant' && message.context_memory?.memory_indicator ? (
-                        <div className="mb-2 p-2 bg-indigo-950 text-indigo-200 border border-indigo-800/80 rounded-xl flex items-center justify-between text-[11px] font-sans">
+                        <div className="mb-2 p-2 bg-indigo-950 text-indigo-200 border border-indigo-800 rounded-xl flex items-center justify-between text-[11px]">
                           <div className="flex items-center space-x-1.5 font-medium">
                             <Brain className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                             <span>{message.context_memory.memory_indicator}</span>
@@ -258,114 +239,43 @@ const Chatbot: React.FC = () => {
                         </div>
                       ) : null}
 
-                      {/* Agent Activity Section (360° Sub-agent trace checklist) */}
-                      {message.role === 'assistant' && (message.agent_activity?.length || message.agents_involved?.length) ? (
-                        <div className="mb-3 p-3 bg-slate-900 text-slate-100 rounded-xl text-xs font-sans shadow-inner border border-slate-800">
-                          <div className="flex items-center justify-between font-semibold border-b border-slate-700/80 pb-1.5 mb-2 text-blue-400">
-                            <span className="flex items-center gap-1.5 text-[11px] font-mono tracking-wide uppercase">
-                              <Workflow className="w-3.5 h-3.5 text-cyan-400" />
-                              Agent Activity & Memory Trace
+                      {/* Main LLM Text Response */}
+                      <div className="text-xs leading-relaxed whitespace-pre-wrap font-sans">
+                        {message.content}
+                      </div>
+
+                      {/* Expandable Technical Trace Accordion */}
+                      {message.role === 'assistant' && (message.agents_involved?.length || message.tool_used) ? (
+                        <div className="mt-2.5 pt-2 border-t border-slate-100">
+                          <button
+                            onClick={() => toggleTraceExpand(index)}
+                            className="flex items-center justify-between w-full text-[10px] text-indigo-600 hover:text-indigo-800 font-mono font-medium"
+                          >
+                            <span className="flex items-center gap-1">
+                              <Workflow className="w-3 h-3 text-cyan-600" />
+                              {expandedTraceIndex === index ? 'Hide Agent Trace' : 'View Agent Execution Trace'}
                             </span>
-                            {message.execution_time_ms ? (
-                              <span className="text-[10px] text-slate-400 font-mono flex items-center">
-                                <Clock className="w-3 h-3 mr-1" />
-                                {message.execution_time_ms}ms
-                              </span>
-                            ) : null}
-                          </div>
-
-                          {/* Steps Checklist */}
-                          <div className="grid grid-cols-1 gap-1 text-[11px] font-medium">
-                            <div className="flex items-center text-purple-300">
-                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-purple-400" />
-                              <span>Memory context retrieved</span>
-                            </div>
-
-                            <div className="flex items-center text-emerald-400">
-                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0" />
-                              <span>Orchestrator selected</span>
-                            </div>
-
-                            {(message.agents_involved?.includes('Research Intelligence Agent') || !message.agents_involved?.length) && (
-                              <div className="flex items-center text-purple-300">
-                                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-purple-400" />
-                                <span>Research Intelligence Agent (Papers)</span>
-                              </div>
+                            {expandedTraceIndex === index ? (
+                              <ChevronUp className="w-3 h-3" />
+                            ) : (
+                              <ChevronDown className="w-3 h-3" />
                             )}
+                          </button>
 
-                            {(message.agents_involved?.includes('Patent & IP Agent') || message.agents_involved?.includes('Competitive Intelligence Agent')) && (
-                              <div className="flex items-center text-indigo-300">
-                                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-indigo-400" />
-                                <span>Patent & IP Agent (Filings)</span>
-                              </div>
-                            )}
-
-                            {message.agents_involved?.includes('News & Social Media Agent') && (
-                              <div className="flex items-center text-sky-300">
-                                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-sky-400" />
-                                <span>News & Social Media Agent (Sentiment)</span>
-                              </div>
-                            )}
-
-                            {message.agents_involved?.includes('Competitor & Market Agent') && (
-                              <div className="flex items-center text-amber-300">
-                                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-amber-400" />
-                                <span>Competitor & Market Agent (Financials)</span>
-                              </div>
-                            )}
-
-                            <div className="flex items-center text-slate-300">
-                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-emerald-400" />
-                              <span>Tools called ({message.tool_used || 'Domain Tools'})</span>
-                            </div>
-
-                            <div className="flex items-center text-slate-300">
-                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-emerald-400" />
-                              <span>Multi-source results retrieved</span>
-                            </div>
-
-                            <div className="flex items-center text-cyan-300">
-                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-cyan-400" />
-                              <span>Cross-agent analysis & memory update completed</span>
-                            </div>
-                          </div>
-
-                          {/* Expandable Data Log */}
-                          {message.retrieved_data && (
-                            <div className="mt-2.5 pt-2 border-t border-slate-800">
-                              <button
-                                onClick={() => toggleToolExpand(index)}
-                                className="flex items-center justify-between w-full text-[10px] text-cyan-400 hover:text-cyan-300 font-mono"
-                              >
-                                <span>
-                                  {expandedToolIndex === index ? 'Hide Raw Retrieved Data' : 'View Raw Retrieved Data Log'}
-                                </span>
-                                {expandedToolIndex === index ? (
-                                  <ChevronUp className="w-3.5 h-3.5" />
-                                ) : (
-                                  <ChevronDown className="w-3.5 h-3.5" />
-                                )}
-                              </button>
-
-                              {expandedToolIndex === index && (
-                                <pre className="mt-2 p-2 bg-slate-950 text-slate-300 text-[10px] font-mono rounded-lg overflow-x-auto max-h-44 border border-slate-800">
-                                  {JSON.stringify(message.retrieved_data, null, 2)}
-                                </pre>
-                              )}
+                          {expandedTraceIndex === index && (
+                            <div className="mt-2 p-2.5 bg-slate-900 text-slate-200 text-[10px] font-mono rounded-lg space-y-1">
+                              <div className="text-cyan-400 font-bold">Sub-Agents: {message.agents_involved?.join(', ')}</div>
+                              <div>Tools Executed: {message.tool_used}</div>
+                              {message.execution_time_ms && <div>Execution Time: {message.execution_time_ms} ms</div>}
                             </div>
                           )}
                         </div>
                       ) : null}
 
-                      {/* Main Message Content */}
-                      <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                        {message.content}
-                      </div>
-
                       {/* Timestamp */}
                       <p
                         className={`text-[10px] mt-1.5 opacity-60 text-right ${
-                          message.role === 'user' ? 'text-white' : 'text-gray-400'
+                          message.role === 'user' ? 'text-white' : 'text-slate-400'
                         }`}
                       >
                         {message.timestamp.toLocaleTimeString([], {
@@ -377,18 +287,16 @@ const Chatbot: React.FC = () => {
                   </div>
                 ))}
 
-                {/* Loading indicator with memory & multi-agent step updates */}
+                {/* Loading indicator */}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-slate-900 text-white border border-slate-800 p-3 rounded-2xl rounded-bl-none shadow-sm max-w-[90%]">
-                      <div className="flex items-center space-x-2.5">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-100"></div>
-                          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-200"></div>
-                        </div>
-                        <span className="text-xs font-mono text-cyan-300 animate-pulse">
-                          {loadingStep}
+                    <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-bl-none shadow-sm max-w-[80%]">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce delay-100"></div>
+                        <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce delay-200"></div>
+                        <span className="text-xs text-slate-500 font-mono">
+                          AI Assistant thinking...
                         </span>
                       </div>
                     </div>
@@ -397,24 +305,22 @@ const Chatbot: React.FC = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Suggested Sequential Memory Test Questions */}
+              {/* Quick Suggested Questions Chips */}
               {messages.length <= 2 && !isLoading && (
-                <div className="px-4 py-2 bg-white border-t border-gray-100">
+                <div className="px-3.5 py-2.5 bg-white border-t border-slate-100">
                   <p className="text-[11px] font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
-                    <Brain className="w-3.5 h-3.5 text-purple-500" />
-                    Context & Memory Test Sequence:
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    Ask Assistant Quick Prompts:
                   </p>
-                  <div className="flex flex-col gap-1">
-                    {suggestedQuestions.map((question, idx) => (
+                  <div className="flex flex-col gap-1.5">
+                    {platformSuggestions.map((promptText, idx) => (
                       <button
                         key={idx}
-                        onClick={() => setInputValue(question)}
-                        className="text-[11px] bg-slate-50 hover:bg-purple-50 text-slate-700 hover:text-purple-700 px-2.5 py-1 rounded-lg border border-slate-200/80 transition-colors text-left font-medium flex items-center gap-1.5"
+                        onClick={() => handleSendMessage(promptText)}
+                        className="text-[11px] bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 px-2.5 py-1.5 rounded-lg border border-slate-200 transition-colors text-left font-medium flex items-center gap-1.5"
                       >
-                        <span className="w-4 h-4 bg-purple-100 text-purple-700 rounded-full text-[10px] flex items-center justify-center font-mono shrink-0">
-                          {idx + 1}
-                        </span>
-                        <span>{question}</span>
+                        <span className="text-blue-600 font-bold">💬</span>
+                        <span>{promptText}</span>
                       </button>
                     ))}
                   </div>
@@ -422,21 +328,21 @@ const Chatbot: React.FC = () => {
               )}
 
               {/* Input Area */}
-              <div className="p-3 bg-white border-t border-gray-100">
+              <div className="p-3 bg-white border-t border-slate-100">
                 <div className="flex items-center space-x-2">
                   <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Enter query (Context is retained across turns)..."
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all placeholder:text-gray-400"
+                    placeholder="Ask any platform or research question..."
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-400"
                     disabled={isLoading}
                   />
                   <button
-                    onClick={handleSendMessage}
+                    onClick={() => handleSendMessage()}
                     disabled={isLoading || !inputValue.trim()}
-                    className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-2.5 rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                    className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-2.5 rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center shrink-0"
                   >
                     <Send className="w-4 h-4" />
                   </button>

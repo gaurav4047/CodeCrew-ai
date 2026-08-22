@@ -1,33 +1,44 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { insightsAPI } from '../services/api';
 import type { Insight } from '../types';
-import { Filter, ExternalLink, Check, AlertCircle } from 'lucide-react';
+import { Filter, ExternalLink, Check, AlertCircle, Lightbulb, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
+import { StatusBadge } from '../components/common/StatusBadge';
+import { ConfidenceBadge } from '../components/common/ConfidenceBadge';
+import { FactInferenceBadge } from '../components/common/FactInferenceBadge';
+import { SourceBadge } from '../components/common/SourceBadge';
+import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
+import { EmptyState } from '../components/common/EmptyState';
+import { ErrorState } from '../components/common/ErrorState';
 
-const Insights = () => {
+const Insights: React.FC = () => {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread' | 'high'>('all');
   const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null);
 
-  useEffect(() => {
-    fetchInsights();
-  }, [filter]);
-
   const fetchInsights = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const params: any = { limit: 50 };
       if (filter === 'unread') params.unread_only = true;
       if (filter === 'high') params.priority = 'high';
-      
+
       const data = await insightsAPI.getAll(params);
       setInsights(data);
-    } catch (error) {
-      console.error('Failed to fetch insights:', error);
+    } catch (err: any) {
+      console.error('Failed to fetch insights:', err);
+      setError('Unable to load AI insights from backend service.');
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchInsights();
+  }, [filter]);
 
   const handleMarkAsRead = async (insight: Insight) => {
     try {
@@ -38,256 +49,192 @@ const Insights = () => {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical':
-        return 'bg-red-100 text-red-800';
-      case 'high':
-        return 'bg-orange-100 text-orange-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'low':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getCategoryColor = (category?: string) => {
-    switch (category) {
-      case 'breakthrough':
-        return 'bg-purple-100 text-purple-800';
-      case 'trend':
-        return 'bg-blue-100 text-blue-800';
-      case 'competitor_activity':
-        return 'bg-red-100 text-red-800';
-      case 'market_shift':
-        return 'bg-green-100 text-green-800';
-      case 'regulatory':
-        return 'bg-indigo-100 text-indigo-800';
-      case 'partnership':
-        return 'bg-pink-100 text-pink-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading insights...</div>
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Insights</h1>
-        <div className="flex items-center space-x-2">
-          <Filter className="w-5 h-5 text-gray-500" />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as any)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+    <div className="space-y-6 font-sans">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <Lightbulb className="w-6 h-6 text-amber-500" />
+            AI Intelligence Insights & Findings
+          </h1>
+          <p className="text-sm text-slate-600 mt-1">
+            Peer-Reviewed Papers • USPTO Patents • Industry Press • Strategic Analysis
+          </p>
+        </div>
+
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-xs">
+            <Filter className="w-4 h-4 text-slate-400" />
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as any)}
+              className="text-xs bg-transparent font-medium text-slate-700 focus:outline-none"
+            >
+              <option value="all">All Insights ({insights.length})</option>
+              <option value="unread">Unread Only</option>
+              <option value="high">High Priority</option>
+            </select>
+          </div>
+
+          <button
+            onClick={fetchInsights}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-3 py-2 rounded-xl border border-slate-200 transition-colors flex items-center gap-1.5"
           >
-            <option value="all">All Insights</option>
-            <option value="unread">Unread Only</option>
-            <option value="high">High Priority</option>
-          </select>
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>Sync</span>
+          </button>
         </div>
       </div>
 
-      <div className="space-y-4">
-        {insights.map((insight) => (
-          <div
-            key={insight.id}
-            className={`bg-white shadow rounded-lg p-6 border-l-4 ${
-              !insight.is_read ? 'border-blue-500' : 'border-gray-300'
-            }`}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getPriorityColor(
-                      insight.priority
-                    )}`}
-                  >
-                    {insight.priority}
-                  </span>
+      {/* Error state */}
+      {error && <ErrorState message={error} onRetry={fetchInsights} />}
+
+      {/* Loading state */}
+      {isLoading ? (
+        <LoadingSkeleton count={4} height="h-40" />
+      ) : insights.length === 0 ? (
+        <EmptyState
+          title="No AI Insights Found"
+          description="Configure tracking targets or execute an AI research query to generate insights."
+        />
+      ) : (
+        <div className="space-y-4">
+          {insights.map((insight) => (
+            <div
+              key={insight.id}
+              className={`bg-white border rounded-2xl p-5 shadow-xs transition-all space-y-3 ${
+                !insight.is_read ? 'border-l-4 border-l-blue-600 border-slate-200 shadow-sm' : 'border-slate-200 opacity-90'
+              }`}
+            >
+              {/* Badges Row */}
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge status={insight.priority} />
+                  <FactInferenceBadge isFact={insight.category !== 'trend'} />
                   {insight.category && (
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(
-                        insight.category
-                      )}`}
-                    >
+                    <span className="bg-slate-100 text-slate-700 text-[11px] font-mono font-medium px-2 py-0.5 rounded capitalize">
                       {insight.category.replace('_', ' ')}
                     </span>
                   )}
-                  {insight.source_type && (
-                    <span className="text-xs text-gray-500">
-                      {insight.source_type}
-                    </span>
+                </div>
+
+                <div className="flex items-center space-x-2 text-xs text-slate-400 font-mono">
+                  {insight.discovered_at && (
+                    <span>{format(new Date(insight.discovered_at), 'MMM d, yyyy HH:mm')}</span>
                   )}
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+              </div>
+
+              {/* Title & Summary */}
+              <div>
+                <h3 className="text-base font-bold text-slate-900 mb-1 leading-snug">
                   {insight.title}
                 </h3>
-                <p className="text-gray-600 mb-3">{insight.summary}</p>
-                {insight.entities && insight.entities.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {insight.entities.slice(0, 5).map((entity, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700"
-                      >
-                        {entity}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  {insight.discovered_at && (
-                    <span>
-                      {format(new Date(insight.discovered_at), 'MMM d, yyyy HH:mm')}
-                    </span>
-                  )}
-                  {insight.relevance_score && (
-                    <span>Relevance: {Math.round(insight.relevance_score * 100)}%</span>
-                  )}
-                </div>
+                <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  {insight.summary}
+                </p>
               </div>
-              <div className="flex items-center space-x-2 ml-4">
-                {insight.source_url && (
-                  <a
-                    href={insight.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 text-gray-500 hover:text-blue-600"
-                  >
-                    <ExternalLink className="w-5 h-5" />
-                  </a>
-                )}
-                {!insight.is_read && (
+
+              {/* Entity Badges */}
+              {insight.entities && insight.entities.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {insight.entities.slice(0, 5).map((entity, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-indigo-50 text-indigo-800 text-[11px] font-mono px-2.5 py-0.5 rounded-lg border border-indigo-100"
+                    >
+                      {entity}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Footer Metadata & Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  {insight.relevance_score && (
+                    <ConfidenceBadge score={Math.round(insight.relevance_score * 100)} />
+                  )}
+                  {insight.source_type && <SourceBadge source={insight.source_type} />}
+                </div>
+
+                <div className="flex items-center space-x-2 shrink-0">
+                  {insight.source_url && (
+                    <a
+                      href={insight.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                      title="View Source"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                  {!insight.is_read && (
+                    <button
+                      onClick={() => handleMarkAsRead(insight)}
+                      className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg font-medium border border-emerald-200 flex items-center space-x-1"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Mark Read</span>
+                    </button>
+                  )}
                   <button
-                    onClick={() => handleMarkAsRead(insight)}
-                    className="p-2 text-gray-500 hover:text-green-600"
-                    title="Mark as read"
+                    onClick={() => setSelectedInsight(insight)}
+                    className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors flex items-center space-x-1"
                   >
-                    <Check className="w-5 h-5" />
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    <span>Inspect</span>
                   </button>
-                )}
-                <button
-                  onClick={() => setSelectedInsight(insight)}
-                  className="p-2 text-gray-500 hover:text-blue-600"
-                  title="View details"
-                >
-                  <AlertCircle className="w-5 h-5" />
-                </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        {insights.length === 0 && (
-          <div className="bg-white shadow rounded-lg p-12 text-center text-gray-500">
-            No insights found. Create tracking configurations to start collecting insights.
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
+      {/* Modal Detail View */}
       {selectedInsight && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 bg-gray-500 bg-opacity-75"
-              onClick={() => setSelectedInsight(null)}
-            />
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-              <div className="px-4 pt-5 pb-4 sm:p-6">
-                <div className="flex items-center space-x-2 mb-4">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getPriorityColor(
-                      selectedInsight.priority
-                    )}`}
-                  >
-                    {selectedInsight.priority}
-                  </span>
-                  {selectedInsight.category && (
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(
-                        selectedInsight.category
-                      )}`}
-                    >
-                      {selectedInsight.category.replace('_', ' ')}
-                    </span>
-                  )}
-                </div>
-                <h3 className="text-xl font-medium text-gray-900 mb-4">
-                  {selectedInsight.title}
-                </h3>
-                <div className="prose prose-sm max-w-none mb-4">
-                  <p className="text-gray-600">{selectedInsight.summary}</p>
-                  {selectedInsight.full_content && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-md">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {selectedInsight.full_content}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {selectedInsight.entities && selectedInsight.entities.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">
-                      Key Entities
-                    </h4>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedInsight.entities.map((entity, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
-                        >
-                          {entity}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="mt-4 flex items-center space-x-4 text-sm text-gray-500">
-                  {selectedInsight.discovered_at && (
-                    <span>
-                      Discovered: {format(new Date(selectedInsight.discovered_at), 'MMM d, yyyy HH:mm')}
-                    </span>
-                  )}
-                  {selectedInsight.published_at && (
-                    <span>
-                      Published: {format(new Date(selectedInsight.published_at), 'MMM d, yyyy')}
-                    </span>
-                  )}
-                  {selectedInsight.relevance_score && (
-                    <span>Relevance: {Math.round(selectedInsight.relevance_score * 100)}%</span>
-                  )}
-                </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden space-y-4 p-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2">
+                <StatusBadge status={selectedInsight.priority} />
+                <FactInferenceBadge isFact={selectedInsight.category !== 'trend'} />
               </div>
-              <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                {selectedInsight.source_url && (
-                  <a
-                    href={selectedInsight.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
-                  >
-                    View Source
-                  </a>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setSelectedInsight(null)}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                >
-                  Close
-                </button>
-              </div>
+              <button
+                onClick={() => setSelectedInsight(null)}
+                className="text-slate-400 hover:text-slate-900 text-sm font-bold font-mono"
+              >
+                ✕
+              </button>
+            </div>
+
+            <h3 className="text-lg font-bold text-slate-900">{selectedInsight.title}</h3>
+
+            <div className="space-y-2 text-xs text-slate-700">
+              <p className="leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                {selectedInsight.summary}
+              </p>
+
+              {selectedInsight.full_content && (
+                <div className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 text-slate-800 font-mono text-[11px] whitespace-pre-wrap">
+                  {selectedInsight.full_content}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-mono">
+                Discovered: {format(new Date(selectedInsight.discovered_at), 'MMM d, yyyy HH:mm')}
+              </span>
+              <button
+                onClick={() => setSelectedInsight(null)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded-xl border border-slate-200"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

@@ -1,8 +1,20 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import Tracking from './pages/Tracking';
-import Insights from './pages/Insights';
 import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import ResearchWorkspace from './pages/ResearchWorkspace';
+import ResearchPapersPage from './pages/ResearchPapersPage';
+import PatentsPage from './pages/PatentsPage';
+import CompetitorsPage from './pages/CompetitorsPage';
+import NewsPage from './pages/NewsPage';
+import SocialIntelligencePage from './pages/SocialIntelligencePage';
+import TrendsPage from './pages/TrendsPage';
+import Insights from './pages/Insights';
+import AlertsPage from './pages/AlertsPage';
+import Tracking from './pages/Tracking';
+import ReportsPage from './pages/ReportsPage';
+import CollectionsPage from './pages/CollectionsPage';
+import KnowledgeGraphPage from './pages/KnowledgeGraphPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
@@ -10,8 +22,20 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="tracking" element={<Tracking />} />
+          <Route path="research" element={<ResearchWorkspace />} />
+          <Route path="papers" element={<ResearchPapersPage />} />
+          <Route path="patents" element={<PatentsPage />} />
+          <Route path="competitors" element={<CompetitorsPage />} />
+          <Route path="news" element={<NewsPage />} />
+          <Route path="social" element={<SocialIntelligencePage />} />
+          <Route path="trends" element={<TrendsPage />} />
           <Route path="insights" element={<Insights />} />
+          <Route path="alerts" element={<AlertsPage />} />
+          <Route path="tracking" element={<Tracking />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="collections" element={<CollectionsPage />} />
+          <Route path="graph" element={<KnowledgeGraphPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route index element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>

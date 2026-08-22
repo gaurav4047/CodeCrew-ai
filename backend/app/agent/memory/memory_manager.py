@@ -66,9 +66,16 @@ class MemoryManager:
 
         cleaned_topic = re.sub(r'\s+(research|patents|news|competitors|and|or)+$', '', cleaned_topic, flags=re.IGNORECASE).strip()
 
-        # Check if topic is a question or follow-up phrase
+        # Check if topic is a question or follow-up phrase or UI header text
         if any(w in cleaned_topic.lower() for w in ["what", "which", "how", "who", "compare", "latest"]):
             return None, sources
+
+        if any(w in cleaned_topic.lower() for w in ["agent activity", "context retrieved", "orchestrator analyzed", "previous topic"]):
+            match = re.search(r'"([^"]+)"', cleaned_topic)
+            if match:
+                cleaned_topic = match.group(1)
+            else:
+                return None, sources
 
         if len(cleaned_topic) > 3:
             return cleaned_topic, sources
