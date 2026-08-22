@@ -68,13 +68,52 @@ class AgentOrchestrator:
 
         return None
 
+    def _create_completion(
+        self,
+        client: OpenAI,
+        messages: List[dict],
+        tools: Optional[List[dict]] = None,
+        temperature: float = 0.5,
+        max_tokens: int = 850
+    ):
+        """Robust model runner trying available models with fallback"""
+        models_to_try = [
+            "groq/compound",
+            "groq/compound-mini",
+            "openai/gpt-oss-20b",
+            "qwen/qwen3.6-27b",
+            "llama-3.3-70b-versatile",
+            "llama-3.1-8b-instant",
+            "llama3-70b-8192",
+            "llama3-8b-8192",
+            "grok-beta"
+        ]
+        last_exception = None
+        for model in models_to_try:
+            try:
+                kwargs: Dict[str, Any] = {
+                    "model": model,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens
+                }
+                if tools:
+                    kwargs["tools"] = tools
+                    kwargs["tool_choice"] = "auto"
+                return client.chat.completions.create(**kwargs)
+            except Exception as e:
+                last_exception = e
+                continue
+        if last_exception:
+            raise last_exception
+        raise RuntimeError("No suitable LLM model found")
+
     def _analyze_agent_delegation(self, query: str) -> List[str]:
         """
         Determines active specialized agents for 360° or focused intelligence.
         """
         q_lower = query.lower()
 
-        # Check for specific targeting
         is_only_research = ("only paper" in q_lower or "only research" in q_lower)
         is_only_patent = ("only patent" in q_lower or "only ip" in q_lower)
         is_only_news = ("only news" in q_lower or "only media" in q_lower)
@@ -216,9 +255,8 @@ class AgentOrchestrator:
                     synth_messages.extend(conversation_history[-4:])
                 synth_messages.append({"role": "user", "content": user_message})
 
-                model_name = "llama-3.1-8b-instant" if "groq" in str(client.base_url) else "grok-beta"
-                synth_res = client.chat.completions.create(
-                    model=model_name,
+                synth_res = self._create_completion(
+                    client=client,
                     messages=synth_messages,
                     temperature=0.5,
                     max_tokens=900
