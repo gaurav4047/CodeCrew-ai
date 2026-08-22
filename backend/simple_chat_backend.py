@@ -36,6 +36,7 @@ class ChatResponse(BaseModel):
     retrieved_data: Optional[Any] = None
     agents_involved: Optional[List[str]] = []
     agent_activity: Optional[List[Dict[str, Any]]] = []
+    context_memory: Optional[Dict[str, Any]] = None
     execution_time_ms: Optional[float] = 0.0
 
 class InsightStats(BaseModel):
@@ -173,9 +174,10 @@ async def delete_tracking_config(config_id: int):
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """
-    360° Multi-Agent Chatbot API:
-    - AI Orchestrator delegates tasks to specialized sub-agents (Research, Patents, News, Competitors)
-    - Concurrently executes domain tools
+    360° Multi-Agent Chatbot API with Memory:
+    - Context Retrieval & Follow-up query resolution
+    - AI Orchestrator delegates tasks to specialized sub-agents
+    - Concurrently executes domain tools & updates memory
     - Performs cross-agent synthesis & returns Agent Activity trace
     """
     try:
@@ -190,6 +192,7 @@ async def chat(request: ChatRequest):
             retrieved_data=result.get("retrieved_data"),
             agents_involved=result.get("agents_involved", []),
             agent_activity=result.get("agent_activity", []),
+            context_memory=result.get("context_memory"),
             execution_time_ms=result.get("execution_time_ms", 0.0)
         )
     except Exception as e:
@@ -200,5 +203,5 @@ async def chat(request: ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting 360-Degree Multi-Agent Intelligence Chatbot API...")
+    print("Starting 360-Degree Multi-Agent Intelligence Chatbot API with Memory...")
     uvicorn.run(app, host="0.0.0.0", port=8000)

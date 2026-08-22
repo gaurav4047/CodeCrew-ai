@@ -7,16 +7,24 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  Sparkles,
   CheckCircle2,
   Workflow,
-  Globe
+  Brain
 } from 'lucide-react';
 
 interface AgentActivityItem {
   step: string;
   status: string;
   details?: string;
+}
+
+interface ContextMemory {
+  is_followup?: boolean;
+  context_used?: string;
+  active_topic?: string;
+  active_sources?: string[];
+  memory_indicator?: string;
+  prior_findings_count?: number;
 }
 
 interface Message {
@@ -28,6 +36,7 @@ interface Message {
   retrieved_data?: any;
   agents_involved?: string[];
   agent_activity?: AgentActivityItem[];
+  context_memory?: ContextMemory;
   execution_time_ms?: number;
 }
 
@@ -38,14 +47,14 @@ const Chatbot: React.FC = () => {
     {
       role: 'assistant',
       content:
-        "Hello! I am your 360° AI Multi-Agent Intelligence Orchestrator. Submit any query or topic—I will automatically search Research Papers, check Patent Filings, monitor News & Social Media, and analyze Competitor & Market Data for you.",
+        "Hello! I am your 360° AI Multi-Agent Intelligence Orchestrator with Context & Memory Management. Submit any query or topic—I will automatically retain context across conversation turns, query research papers, patent filings, news/social media, and competitor telemetry for you.",
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [expandedToolIndex, setExpandedToolIndex] = useState<number | null>(null);
-  const [loadingStep, setLoadingStep] = useState<string>('🤖 AI Orchestrator analyzing query...');
+  const [loadingStep, setLoadingStep] = useState<string>('🧠 Retrieving context & memory...');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -61,12 +70,13 @@ const Chatbot: React.FC = () => {
     let interval: any;
     if (isLoading) {
       const steps = [
+        '🧠 Memory Manager retrieving active topic context...',
         '🤖 AI Orchestrator deploying 360° agent delegation...',
         '🔬 Research Agent: Searching academic papers...',
         '📜 Patent Agent: Checking IP filings...',
         '📰 News & Social Agent: Monitoring media sentiment...',
-        '🏢 Competitor Agent: Analyzing market & DB metrics...',
-        '🌐 Performing 360° cross-agent analytical synthesis...'
+        '🏢 Competitor Agent: Analyzing market metrics...',
+        '💾 Updating short-term & persistent memory state...'
       ];
       let stepIdx = 0;
       setLoadingStep(steps[0]);
@@ -121,6 +131,7 @@ const Chatbot: React.FC = () => {
         retrieved_data: data.retrieved_data,
         agents_involved: data.agents_involved,
         agent_activity: data.agent_activity,
+        context_memory: data.context_memory,
         execution_time_ms: data.execution_time_ms
       };
 
@@ -155,10 +166,10 @@ const Chatbot: React.FC = () => {
   };
 
   const suggestedQuestions = [
-    "AI Medical Diagnosis (Search Papers, Patents, News, Competitors)",
-    "Quantum Computing Transformers (Research + IP + News)",
-    "Nvidia Blackwell GPU (Competitor + Patent + Market News)",
-    "Search database for high priority insights"
+    "Track AI medical diagnosis research and patents.",
+    "What are the latest updates?",
+    "Which competitors are involved?",
+    "Compare them with the research we found earlier."
   ];
 
   return (
@@ -168,10 +179,10 @@ const Chatbot: React.FC = () => {
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-4 rounded-full shadow-2xl hover:scale-105 transition-all z-50 flex items-center space-x-2"
-          title="Open 360° AI Multi-Agent Assistant"
+          title="Open 360° AI Assistant with Memory"
         >
-          <Globe className="w-6 h-6 animate-pulse text-cyan-300" />
-          <span className="font-semibold text-sm pr-1">360° AI Agent</span>
+          <Brain className="w-6 h-6 animate-pulse text-purple-300" />
+          <span className="font-semibold text-sm pr-1">AI Agent & Memory</span>
         </button>
       )}
 
@@ -185,18 +196,18 @@ const Chatbot: React.FC = () => {
           {/* Header */}
           <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white p-3.5 rounded-t-2xl flex items-center justify-between shadow-md">
             <div className="flex items-center space-x-2.5">
-              <div className="p-1.5 bg-cyan-500/20 rounded-lg border border-cyan-400/30">
-                <Workflow className="w-5 h-5 text-cyan-400 animate-pulse" />
+              <div className="p-1.5 bg-purple-500/20 rounded-lg border border-purple-400/30">
+                <Brain className="w-5 h-5 text-purple-300 animate-pulse" />
               </div>
               <div>
                 <h3 className="font-semibold text-sm leading-none flex items-center gap-1.5">
-                  360° Multi-Agent Intelligence
-                  <span className="bg-cyan-500/20 text-cyan-300 text-[10px] px-2 py-0.5 rounded-full border border-cyan-400/30 font-mono">
-                    4 Pillars
+                  AI Agent with Context & Memory
+                  <span className="bg-purple-500/20 text-purple-200 text-[10px] px-2 py-0.5 rounded-full border border-purple-400/30 font-mono">
+                    Context Retained
                   </span>
                 </h3>
                 <p className="text-[11px] text-gray-300 mt-0.5">
-                  Research • Patents • News/Social • Competitors
+                  Short-Term & Persistent Long-Term Memory
                 </p>
               </div>
             </div>
@@ -237,13 +248,23 @@ const Chatbot: React.FC = () => {
                           : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none'
                       }`}
                     >
+                      {/* Context / Memory Indicator Badge */}
+                      {message.role === 'assistant' && message.context_memory?.memory_indicator ? (
+                        <div className="mb-2 p-2 bg-indigo-950 text-indigo-200 border border-indigo-800/80 rounded-xl flex items-center justify-between text-[11px] font-sans">
+                          <div className="flex items-center space-x-1.5 font-medium">
+                            <Brain className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                            <span>{message.context_memory.memory_indicator}</span>
+                          </div>
+                        </div>
+                      ) : null}
+
                       {/* Agent Activity Section (360° Sub-agent trace checklist) */}
                       {message.role === 'assistant' && (message.agent_activity?.length || message.agents_involved?.length) ? (
                         <div className="mb-3 p-3 bg-slate-900 text-slate-100 rounded-xl text-xs font-sans shadow-inner border border-slate-800">
                           <div className="flex items-center justify-between font-semibold border-b border-slate-700/80 pb-1.5 mb-2 text-blue-400">
                             <span className="flex items-center gap-1.5 text-[11px] font-mono tracking-wide uppercase">
                               <Workflow className="w-3.5 h-3.5 text-cyan-400" />
-                              Agent Activity & Multi-Source Trace
+                              Agent Activity & Memory Trace
                             </span>
                             {message.execution_time_ms ? (
                               <span className="text-[10px] text-slate-400 font-mono flex items-center">
@@ -253,8 +274,13 @@ const Chatbot: React.FC = () => {
                             ) : null}
                           </div>
 
-                          {/* 4 Pillars Steps Checklist */}
+                          {/* Steps Checklist */}
                           <div className="grid grid-cols-1 gap-1 text-[11px] font-medium">
+                            <div className="flex items-center text-purple-300">
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-purple-400" />
+                              <span>Memory context retrieved</span>
+                            </div>
+
                             <div className="flex items-center text-emerald-400">
                               <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0" />
                               <span>Orchestrator selected</span>
@@ -290,7 +316,7 @@ const Chatbot: React.FC = () => {
 
                             <div className="flex items-center text-slate-300">
                               <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-emerald-400" />
-                              <span>Tools called ({message.tool_used || 'Multi-Domain Tools'})</span>
+                              <span>Tools called ({message.tool_used || 'Domain Tools'})</span>
                             </div>
 
                             <div className="flex items-center text-slate-300">
@@ -300,7 +326,7 @@ const Chatbot: React.FC = () => {
 
                             <div className="flex items-center text-cyan-300">
                               <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-cyan-400" />
-                              <span>360° Cross-agent synthesis completed</span>
+                              <span>Cross-agent analysis & memory update completed</span>
                             </div>
                           </div>
 
@@ -312,7 +338,7 @@ const Chatbot: React.FC = () => {
                                 className="flex items-center justify-between w-full text-[10px] text-cyan-400 hover:text-cyan-300 font-mono"
                               >
                                 <span>
-                                  {expandedToolIndex === index ? 'Hide 360° Raw Retrieved Data' : 'View 360° Raw Retrieved Data Log'}
+                                  {expandedToolIndex === index ? 'Hide Raw Retrieved Data' : 'View Raw Retrieved Data Log'}
                                 </span>
                                 {expandedToolIndex === index ? (
                                   <ChevronUp className="w-3.5 h-3.5" />
@@ -351,15 +377,15 @@ const Chatbot: React.FC = () => {
                   </div>
                 ))}
 
-                {/* Loading indicator with multi-agent step updates */}
+                {/* Loading indicator with memory & multi-agent step updates */}
                 {isLoading && (
                   <div className="flex justify-start">
                     <div className="bg-slate-900 text-white border border-slate-800 p-3 rounded-2xl rounded-bl-none shadow-sm max-w-[90%]">
                       <div className="flex items-center space-x-2.5">
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-100"></div>
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce delay-200"></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-100"></div>
+                          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-200"></div>
                         </div>
                         <span className="text-xs font-mono text-cyan-300 animate-pulse">
                           {loadingStep}
@@ -371,21 +397,24 @@ const Chatbot: React.FC = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Suggested Questions */}
+              {/* Suggested Sequential Memory Test Questions */}
               {messages.length <= 2 && !isLoading && (
                 <div className="px-4 py-2 bg-white border-t border-gray-100">
                   <p className="text-[11px] font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    360° Intelligence Demo Queries:
+                    <Brain className="w-3.5 h-3.5 text-purple-500" />
+                    Context & Memory Test Sequence:
                   </p>
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-1">
                     {suggestedQuestions.map((question, idx) => (
                       <button
                         key={idx}
                         onClick={() => setInputValue(question)}
-                        className="text-[11px] bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 px-3 py-1.5 rounded-lg border border-slate-200/80 transition-colors text-left font-medium"
+                        className="text-[11px] bg-slate-50 hover:bg-purple-50 text-slate-700 hover:text-purple-700 px-2.5 py-1 rounded-lg border border-slate-200/80 transition-colors text-left font-medium flex items-center gap-1.5"
                       >
-                        🌐 {question}
+                        <span className="w-4 h-4 bg-purple-100 text-purple-700 rounded-full text-[10px] flex items-center justify-center font-mono shrink-0">
+                          {idx + 1}
+                        </span>
+                        <span>{question}</span>
                       </button>
                     ))}
                   </div>
@@ -400,8 +429,8 @@ const Chatbot: React.FC = () => {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Enter query (Searches Papers, Patents, News, Competitors)..."
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-gray-400"
+                    placeholder="Enter query (Context is retained across turns)..."
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all placeholder:text-gray-400"
                     disabled={isLoading}
                   />
                   <button

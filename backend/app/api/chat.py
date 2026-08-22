@@ -21,16 +21,18 @@ class ChatResponse(BaseModel):
     retrieved_data: Optional[Any] = None
     agents_involved: Optional[List[str]] = []
     agent_activity: Optional[List[Dict[str, Any]]] = []
+    context_memory: Optional[Dict[str, Any]] = None
     execution_time_ms: Optional[float] = 0.0
 
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     """
-    Multi-Agent Chat endpoint powered by AI Orchestrator:
-    - Analyzes query intent and delegates to specialized sub-agents (Research Intelligence Agent, Competitive Intelligence Agent)
-    - Dynamically executes sub-agent tool pipelines
-    - Performs cross-agent analytical synthesis and returns step-by-step Agent Activity trace
+    Multi-Agent Chat endpoint with Context & Memory Management:
+    - Context Retrieval & Follow-up query resolution
+    - AI Orchestrator delegation to specialized sub-agents
+    - Concurrent tool execution & Memory update
+    - Cross-agent response synthesis
     """
     try:
         result = await agent_orchestrator.process_query(
@@ -44,6 +46,7 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
             retrieved_data=result.get("retrieved_data"),
             agents_involved=result.get("agents_involved", []),
             agent_activity=result.get("agent_activity", []),
+            context_memory=result.get("context_memory"),
             execution_time_ms=result.get("execution_time_ms", 0.0)
         )
     except Exception as e:
