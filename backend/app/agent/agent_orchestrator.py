@@ -12,6 +12,8 @@ from app.agent.tools.database_tool import DatabaseInsightTool
 from app.agent.tools.patent_tool import PatentSearchTool
 from app.agent.agents.research_agent import ResearchIntelligenceAgent
 from app.agent.agents.competitive_agent import CompetitiveIntelligenceAgent
+from app.agent.agents.news_social_agent import NewsSocialAgent
+from app.agent.agents.market_competitor_agent import MarketCompetitorAgent
 from app.agent.agents.base_agent import AgentResult
 from app.core.config import settings
 
@@ -31,21 +33,24 @@ def initialize_tools():
 
 class AgentOrchestrator:
     """
-    AI Multi-Agent Orchestrator:
+    360-Degree AI Multi-Agent Orchestrator:
     1. Analyzes user query intent.
-    2. Dynamically decides which specialized agent(s) to use:
-       - Research Intelligence Agent (Research Paper queries)
-       - Competitive Intelligence Agent (Patent, News, Competitor queries)
-       - BOTH Agents (Cross-domain queries: Research + Patents/Competitive)
-    3. Delegates tasks to specialized agents asynchronously.
-    4. Tracks real step-by-step Agent Activity trace.
-    5. Combines agent results with cross-agent synthesis to generate final actionable response.
+    2. Dynamically decides which specialized agent(s) to deploy across 4 core pillars:
+       - Research Intelligence Agent (Research Papers & Literature)
+       - Patent & IP Agent (Patent Filings & Claims)
+       - News & Social Media Agent (News & Media Trends)
+       - Competitor & Market Agent (Corporate Financials & DB Telemetry)
+    3. Delegates tasks to sub-agents and executes tools concurrently.
+    4. Records step-by-step Agent Activity trace.
+    5. Combines all findings into a unified 360-degree actionable intelligence report.
     """
 
     def __init__(self):
         initialize_tools()
         self.research_agent = ResearchIntelligenceAgent()
-        self.competitive_agent = CompetitiveIntelligenceAgent()
+        self.patent_agent = CompetitiveIntelligenceAgent()
+        self.news_agent = NewsSocialAgent()
+        self.market_agent = MarketCompetitorAgent()
 
     def _get_openai_client(self) -> Optional[OpenAI]:
         """Gets configured OpenAI client"""
@@ -65,33 +70,29 @@ class AgentOrchestrator:
 
     def _analyze_agent_delegation(self, query: str) -> List[str]:
         """
-        Determines which specialized sub-agents should be activated for the query.
+        Determines active specialized agents for 360° or focused intelligence.
         """
         q_lower = query.lower()
 
-        has_research = any(term in q_lower for term in [
-            "paper", "research", "arxiv", "journal", "academic", "scholar",
-            "study", "literature", "diagnosis", "algorithm", "model"
-        ])
-        has_competitive = any(term in q_lower for term in [
-            "patent", "ip ", "filing", "claim", "competitor", "competitive",
-            "market", "news", "industry", "impact", "commercial"
-        ])
+        # Check for specific targeting
+        is_only_research = ("only paper" in q_lower or "only research" in q_lower)
+        is_only_patent = ("only patent" in q_lower or "only ip" in q_lower)
+        is_only_news = ("only news" in q_lower or "only media" in q_lower)
 
-        active_agents = []
-        if has_research:
-            active_agents.append("Research Intelligence Agent")
-        if has_competitive:
-            active_agents.append("Competitive Intelligence Agent")
+        if is_only_research:
+            return ["Research Intelligence Agent"]
+        if is_only_patent:
+            return ["Patent & IP Agent"]
+        if is_only_news:
+            return ["News & Social Media Agent"]
 
-        # Fallback: if query matches neither explicitly, pick default based on keywords or both if query is broad
-        if not active_agents:
-            if "company" in q_lower or "news" in q_lower:
-                active_agents.append("Competitive Intelligence Agent")
-            else:
-                active_agents.append("Research Intelligence Agent")
-
-        return active_agents
+        # Default: 360-Degree Intelligence Gathering across all 4 pillars
+        return [
+            "Research Intelligence Agent",
+            "Patent & IP Agent",
+            "News & Social Media Agent",
+            "Competitor & Market Agent"
+        ]
 
     async def process_query(
         self,
@@ -99,8 +100,7 @@ class AgentOrchestrator:
         conversation_history: Optional[List[dict]] = None
     ) -> Dict[str, Any]:
         """
-        Executes Multi-Agent Workflow:
-        User Query -> Orchestrator -> Sub-Agents -> Tools -> Cross-Agent Synthesis -> Final Response
+        Executes 360° Multi-Agent Workflow across Research, Patents, News/Social Media, and Competitors/Market.
         """
         start_time = time.time()
         client = self._get_openai_client()
@@ -110,7 +110,7 @@ class AgentOrchestrator:
             {
                 "step": "Orchestrator selected",
                 "status": "completed",
-                "details": "AI Orchestrator analyzed query intent and initiated delegation plan."
+                "details": "AI Orchestrator initiated 360-degree multi-agent delegation plan."
             }
         ]
 
@@ -119,21 +119,38 @@ class AgentOrchestrator:
         logger.info(f"[Orchestrator] Active agents selected: {selected_agent_names} for query: '{user_message}'")
 
         agent_tasks = []
+
         if "Research Intelligence Agent" in selected_agent_names:
             activity_log.append({
                 "step": "Research Intelligence Agent",
                 "status": "completed",
-                "details": "Delegated research paper and academic literature analysis."
+                "details": "Searching research papers and scientific literature."
             })
             agent_tasks.append(self.research_agent.run_task(user_message))
 
-        if "Competitive Intelligence Agent" in selected_agent_names:
+        if "Patent & IP Agent" in selected_agent_names or "Competitive Intelligence Agent" in selected_agent_names:
             activity_log.append({
-                "step": "Competitive Intelligence Agent",
+                "step": "Patent & IP Agent",
                 "status": "completed",
-                "details": "Delegated patent landscape and competitive impact analysis."
+                "details": "Searching patent applications and IP filings."
             })
-            agent_tasks.append(self.competitive_agent.run_task(user_message))
+            agent_tasks.append(self.patent_agent.run_task(user_message))
+
+        if "News & Social Media Agent" in selected_agent_names:
+            activity_log.append({
+                "step": "News & Social Media Agent",
+                "status": "completed",
+                "details": "Searching recent industry news and social media discussions."
+            })
+            agent_tasks.append(self.news_agent.run_task(user_message))
+
+        if "Competitor & Market Agent" in selected_agent_names:
+            activity_log.append({
+                "step": "Competitor & Market Agent",
+                "status": "completed",
+                "details": "Analyzing competitor metrics and database insights."
+            })
+            agent_tasks.append(self.market_agent.run_task(user_message))
 
         # Step 3: Run sub-agents concurrently
         agent_results: List[AgentResult] = await asyncio.gather(*agent_tasks)
@@ -155,9 +172,9 @@ class AgentOrchestrator:
         # Step 4: Cross-Agent Analysis & Synthesis
         is_multi_agent = len(agent_results) > 1
         activity_log.append({
-            "step": "Cross-agent analysis completed",
+            "step": "360° Cross-agent synthesis completed",
             "status": "completed",
-            "details": "Combined scientific research and competitive IP findings into actionable intelligence." if is_multi_agent else "Single-agent analysis finalized."
+            "details": "Correlated research literature, patent claims, news/social sentiment, and competitor dynamics." if is_multi_agent else "Single-agent analysis finalized."
         })
 
         # Aggregate retrieved data and tools metadata
@@ -182,12 +199,16 @@ class AgentOrchestrator:
 
                 system_prompt = (
                     f"You are the AI Chief Intelligence Orchestrator. The user asked: '{user_message}'.\n"
-                    f"You delegated this query to {len(agent_results)} specialized agent(s): {', '.join(selected_agent_names)}.\n\n"
-                    f"Agent Findings & Retrieved Data:\n{findings_summary}\n\n"
-                    "Instructions for Final Synthesis Output:\n"
-                    "1. Provide a comprehensive, actionable response that directly answers the user's query.\n"
-                    "2. If multiple agents were used (e.g. Research + Competitive/Patents), perform a CROSS-AGENT ANALYSIS linking scientific research developments to patent filings, commercial applications, and strategic competitive impact.\n"
-                    "3. Format cleanly with markdown headers, bullet points, and strategic takeaways.\n"
+                    f"You deployed {len(agent_results)} specialized sub-agents: {', '.join(selected_agent_names)}.\n\n"
+                    f"Sub-Agent Findings across Research, Patents, News/Social Media, and Competitor Data:\n{findings_summary}\n\n"
+                    "Instructions for Final Output:\n"
+                    "1. Deliver a 360-degree comprehensive intelligence report answering the user's query.\n"
+                    "2. Structure your report into 4 clear pillars:\n"
+                    "   - 🔬 Academic & Scientific Research Findings\n"
+                    "   - 📜 Patent & Intellectual Property Filings\n"
+                    "   - 📰 Industry News & Social Media Sentiment\n"
+                    "   - 🏢 Competitor Dynamics & Strategic Takeaways\n"
+                    "3. Provide actionable competitive conclusions.\n"
                 )
 
                 synth_messages = [{"role": "system", "content": system_prompt}]
@@ -200,7 +221,7 @@ class AgentOrchestrator:
                     model=model_name,
                     messages=synth_messages,
                     temperature=0.5,
-                    max_tokens=850
+                    max_tokens=900
                 )
                 final_response = synth_res.choices[0].message.content
             except Exception as e:
@@ -222,23 +243,24 @@ class AgentOrchestrator:
         }
 
     def _synthesize_fallback(self, query: str, results: List[AgentResult]) -> str:
-        """Deterministic cross-agent synthesis fallback when LLM API is unavailable"""
+        """Deterministic 360° multi-agent synthesis fallback"""
         output = [
-            f"### 🤖 Multi-Agent Intelligence Report: *\"{query}\"*",
-            f"**Delegated Sub-Agents:** {', '.join([res.agent_name for res in results])}\n"
+            f"### 🌐 360° Comprehensive Multi-Agent Intelligence Report: *\"{query}\"*",
+            f"**Deployed Specialized Sub-Agents:** {', '.join([res.agent_name for res in results])}\n"
         ]
 
         for res in results:
-            output.append(f"#### 🔬 {res.agent_name} Report (Tool: `{res.tool_called}`):")
+            output.append(f"#### 🔍 {res.agent_name} (Tool: `{res.tool_called}`):")
             output.append(res.analytical_finding)
             output.append("")
 
         if len(results) > 1:
-            output.append("#### 🌐 Cross-Agent Strategic Correlation & Competitive Impact:")
+            output.append("#### 💡 Integrated Strategic Intelligence Synthesis:")
             output.append(
-                "1. **Academic to Commercial Pipeline:** Research paper developments are directly translating into active patent filings and IP claims.\n"
-                "2. **Competitive Moat:** Early patentees are establishing high technological barriers, creating a tight competitive landscape.\n"
-                "3. **Strategic Recommendation:** Organizations should align internal R&D with emerging patent claim boundaries to mitigate infringement risks while capturing first-mover market advantages."
+                "1. **Research to IP Conversion:** Scientific breakthroughs in literature are quickly being converted into defensive patent claims.\n"
+                "2. **Market Sentiment:** Public news and social channels reflect growing adoption and high commercial interest.\n"
+                "3. **Competitor Posture:** Major market players are consolidating IP and expanding infrastructure investment.\n"
+                "4. **Actionable Recommendation:** Continuously monitor patent publications and scientific preprints to maintain technological leadership."
             )
 
         return "\n".join(output)
