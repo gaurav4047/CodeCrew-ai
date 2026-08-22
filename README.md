@@ -1,163 +1,139 @@
-# Competitive Intelligence AI Agent
+# CodeCrew5 AI — Enterprise AI Research & Competitive Intelligence Platform
 
-An autonomous AI agent system for continuously tracking research trends, patent developments, competitor strategies, and industry news for organizations, startups, and research institutions.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Python: 3.11+](https://img.shields.io/badge/Python-3.11%2B-emerald.svg)](https://python.org)
+[![React: 18](https://img.shields.io/badge/React-18-cyan.svg)](https://react.dev)
+[![LLM: Groq API](https://img.shields.io/badge/LLM-Groq%20API%20%28groq%2Fcompound%29-purple.svg)](https://groq.com)
+[![Framework: LangGraph](https://img.shields.io/badge/Orchestrator-LangGraph%20Stateful-indigo.svg)](https://github.com/gaurav4047/CodeCrew5-ai)
 
-## Features
+**CodeCrew5 AI** is an enterprise-grade, multi-agent AI research and competitive intelligence SaaS platform. It continuously ingests, cross-verifies, and synthesizes 360° intelligence across scientific research preprints, worldwide patent claims, competitor corporate filings, industry media feeds, and public social signals using **LangGraph stateful orchestration** and **Groq LPU LLM inference**.
 
-- **Multi-Source Data Collection**: Monitor scientific publications, patent databases, news platforms, and social media
-- **AI-Powered Analysis**: Extract actionable insights from vast information sources
-- **Real-Time Monitoring**: Continuous tracking with configurable schedules
-- **Competitive Intelligence**: Track competitor activities and strategies
-- **Alert System**: Timely notifications for important developments
-- **Interactive Dashboard**: Visualize trends, insights, and analytics
-- **Customizable Tracking**: Configure sources, keywords, and alert preferences
+---
 
-## Architecture
+## 🌟 Key Features & Capabilities
 
-### Components
+- 🤖 **LangGraph Stateful Orchestration**:
+  - **Dynamic Task Planning**: Automatically decomposes complex queries into multi-agent execution sub-tasks.
+  - **Parallel Sub-Agent Execution**: Deploys 4 specialized agents concurrently.
+  - **API Fallback Recovery**: Recovers automatically from external data source latency spikes.
+  - **Conflicting Evidence Resolution**: Cross-verifies corporate press claims against academic preprints.
+  - **Self-Evaluation & Confidence Scoring**: Calculates confidence scores (e.g. `94.5%`) before final output approval.
+- 🧠 **Context & Memory Engine**:
+  - Short-term & persistent long-term memory retaining active topics, user context, and prior findings across multi-turn queries.
+- 📊 **Curated Executive Command Center**:
+  - Modular Widget Architecture (`WIDGET_REGISTRY`) with an **Executive Focus** default view and category tabs (`Market & Discovery`, `System & Telemetry`).
+- 🌐 **Enterprise SaaS Interface (15 Routes)**:
+  - 📊 **Dashboard** (`/dashboard`): Curated Executive Command Center overview.
+  - 🔍 **AI Research Workspace** (`/research`): Universal AI Research Bar, execution events panel, and node graph topology.
+  - 🔬 **Research Papers** (`/papers`): arXiv / PubMed preprints, citations, abstracts, and arXiv links.
+  - 📜 **Patents** (`/patents`): USPTO / EPO claims, assignee tracking, and Google Patents links.
+  - 🏢 **Competitors** (`/competitors`): Corporate profiles, products, tech stacks, market cap, and timeline moves.
+  - 📰 **News Intelligence** (`/news`): Industry press feed with confidence scores and category tags.
+  - 🌐 **Social Intelligence** (`/social`): Public community sentiment, mention curves, and **Fact vs Signal** indicators.
+  - 📈 **Trend Radar** (`/trends`): Emerging (+142%), Growing (+88%), and Stable (+35%) tech trajectories.
+  - 💡 **Insights** (`/insights`): Categorized findings (**`Verified Fact`** vs **`AI Inference`** vs **`Recommendation`**).
+  - 🚨 **Priority Alerts** (`/alerts`): Critical, High, Medium severity alerts with mark read and dismissal controls.
+  - 🎯 **Tracking Targets** (`/tracking`): Full CRUD management of automated monitoring targets.
+  - 📄 **Reports & Export** (`/reports`): Executive summaries with PDF / CSV / JSON export engines.
+  - 📑 **Collections** (`/collections`): Bookmarked research papers, priority patent claims, and saved items.
+  - 🕸️ **Knowledge Graph** (`/graph`): Interactive SVG node topology graph connecting Companies, Tech, Papers, Patents, Products.
+  - ⚙️ **Settings** (`/settings`): Resource awareness, Groq API telemetry, and platform status.
 
-1. **Data Ingestion Layer**
-   - Research Papers Collector (arXiv, PubMed, Google Scholar)
-   - Patent Monitor (Google Patents, USPTO, EPO)
-   - News Aggregator (News APIs, RSS feeds)
-   - Social Media Tracker (Twitter/X, LinkedIn, Reddit)
+---
 
-2. **AI Analysis Engine**
-   - Content summarization and extraction
-   - Trend detection and analysis
-   - Competitor activity analysis
-   - Insight generation and prioritization
+## 🛠️ Multi-Agent Architecture
 
-3. **Monitoring & Scheduling**
-   - Task scheduling (Celery + Redis)
-   - Real-time monitoring
-   - Alert triggering system
+```mermaid
+flowchart TD
+    User([User Query]) --> UniversalBar[Universal AI Research Bar / Chatbot]
+    UniversalBar --> Memory[Memory Manager - Context & History]
+    Memory --> Orchestrator[LangGraph Stateful Orchestrator]
+    
+    Orchestrator --> DynamicPlanner[Dynamic Task Planner]
+    
+    subgraph 4-Pillar Parallel Sub-Agent Engine
+        DynamicPlanner --> Agent1[Research Intelligence Agent\nResearchPaperTool / arXiv API]
+        DynamicPlanner --> Agent2[Patent & IP Agent\nPatentSearchTool / USPTO API]
+        DynamicPlanner --> Agent3[News & Social Media Agent\nNewsSearchTool / Media Feeds]
+        DynamicPlanner --> Agent4[Competitor & Market Agent\nCompanyInfoTool / DB Insights]
+    end
 
-4. **Data Persistence**
-   - PostgreSQL database
-   - Vector storage for semantic search
-   - Cache layer for performance
+    Agent1 & Agent2 & Agent3 & Agent4 --> Resolution[Conflicting Evidence Resolution & Verification]
+    Resolution --> SelfEval[Self-Evaluation & Confidence Scoring]
+    SelfEval --> Output[360° Comprehensive Intelligence Synthesis]
+```
 
-5. **API Layer**
-   - RESTful API (FastAPI)
-   - WebSocket for real-time updates
-   - Authentication and authorization
+---
 
-6. **Frontend Dashboard**
-   - React + TypeScript
-   - Data visualization
-   - Configuration management
-
-## Tech Stack
-
-- **Backend**: Python 3.11+, FastAPI
-- **Database**: PostgreSQL + SQLAlchemy
-- **Task Queue**: Celery + Redis
-- **AI/ML**: OpenAI API, LangChain, Sentence Transformers
-- **Frontend**: React + TypeScript + Vite
-- **Containerization**: Docker + Docker Compose
-- **Monitoring**: Prometheus + Grafana (optional)
-
-## Quick Start
+## 🚀 Quick Start Guide
 
 ### Prerequisites
+- **Python 3.11+**
+- **Node.js 18+** / **npm 9+**
+- **Groq API Key** (`gsk_...`)
 
-- Python 3.11+
-- Node.js 18+
-- PostgreSQL 14+
-- Redis 7+
-- Docker (optional)
-
-### Installation
-
-1. Clone the repository:
+### 1. Clone the Repository
 ```bash
-git clone <repository-url>
-cd codecrew
+git clone https://github.com/gaurav4047/CodeCrew5-ai.git
+cd CodeCrew5-ai
 ```
 
-2. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your API keys and configuration
-```
-
-3. Install backend dependencies:
+### 2. Backend Setup
 ```bash
 cd backend
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Install frontend dependencies:
+Start the backend API server:
+```bash
+python3 simple_chat_backend.py
+```
+*The backend API server will start on `http://localhost:8000`.*
+
+### 3. Frontend Setup
+In a new terminal window:
 ```bash
 cd frontend
 npm install
-```
-
-5. Initialize database:
-```bash
-cd backend
-python -m alembic upgrade head
-```
-
-6. Start services:
-```bash
-# Using Docker Compose (recommended)
-docker-compose up -d
-
-# Or manually start services
-redis-server
-celery -A backend.tasks worker -l info
-python -m backend.main
-```
-
-7. Start frontend:
-```bash
-cd frontend
 npm run dev
 ```
+*The frontend application will start on `http://localhost:3001` or `http://localhost:3000`.*
 
-## Configuration
+---
 
-Edit `.env` file to configure:
-- API keys (OpenAI, news APIs, social media APIs)
-- Database connection strings
-- Monitoring intervals
-- Alert preferences
-- Source configurations
+## 🛰️ Key REST API Endpoints
 
-## Usage
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/chat` | Main multi-agent research endpoint executing LangGraph orchestration & memory context. |
+| `GET` | `/api/dashboard/summary` | Real-time command center metrics across all 16 platform categories. |
+| `GET` | `/api/insights/` | Retrieves all categorized insights with filter params (`unread_only`, `priority`). |
+| `GET` | `/api/insights/stats/summary` | Returns insight statistics (total, unread, recent, high priority). |
+| `GET` | `/api/tracking/` | Retrieves active automated tracking target configurations. |
+| `POST` | `/api/tracking/` | Creates a new tracking target configuration. |
+| `PUT` | `/api/tracking/{id}` | Updates an existing tracking target configuration or toggles active status. |
+| `DELETE` | `/api/tracking/{id}` | Deletes a tracking target configuration. |
+| `GET` | `/api/models` | Lists active LLM models (Groq API `groq/compound`, `llama-3.3-70b-versatile`). |
 
-### API Endpoints
+---
 
-- `POST /api/track` - Add new tracking configuration
-- `GET /api/insights` - Retrieve generated insights
-- `GET /api/trends` - Get trend analysis
-- `WS /api/real-time` - WebSocket for real-time updates
+## 🧪 Testing & Building
 
-### Dashboard
-
-Access the dashboard at `http://localhost:3000`
-
-## Development
-
-### Running Tests
-
+### Frontend TypeScript Compilation & Bundling
 ```bash
-# Backend tests
-cd backend
-pytest
-
-# Frontend tests
 cd frontend
-npm test
+npm run build
 ```
 
-### Code Style
+### Backend API Status Check
+```bash
+curl -X GET http://localhost:8000/api/dashboard/summary
+```
 
-- Backend: Black, Flake8, mypy
-- Frontend: ESLint, Prettier
+---
 
-## License
+## 📄 License
 
-MIT License
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
