@@ -4,19 +4,20 @@ import {
   X,
   Minimize2,
   Maximize2,
-  Wrench,
   ChevronDown,
   ChevronUp,
   Cpu,
   Clock,
   Sparkles,
-  Database,
-  Search,
-  FileText,
-  Building2,
-  Newspaper,
-  ShieldCheck
+  CheckCircle2,
+  Workflow
 } from 'lucide-react';
+
+interface AgentActivityItem {
+  step: string;
+  status: string;
+  details?: string;
+}
 
 interface Message {
   role: 'user' | 'assistant';
@@ -25,26 +26,10 @@ interface Message {
   tool_used?: string;
   tool_params?: Record<string, any>;
   retrieved_data?: any;
+  agents_involved?: string[];
+  agent_activity?: AgentActivityItem[];
   execution_time_ms?: number;
 }
-
-const getToolIcon = (toolName?: string) => {
-  if (!toolName) return <Wrench className="w-3.5 h-3.5" />;
-  switch (toolName) {
-    case 'NewsSearchTool':
-      return <Newspaper className="w-3.5 h-3.5 text-blue-500" />;
-    case 'ResearchPaperTool':
-      return <FileText className="w-3.5 h-3.5 text-purple-500" />;
-    case 'CompanyInfoTool':
-      return <Building2 className="w-3.5 h-3.5 text-emerald-500" />;
-    case 'DatabaseInsightTool':
-      return <Database className="w-3.5 h-3.5 text-amber-500" />;
-    case 'PatentSearchTool':
-      return <ShieldCheck className="w-3.5 h-3.5 text-indigo-500" />;
-    default:
-      return <Search className="w-3.5 h-3.5 text-sky-500" />;
-  }
-};
 
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,14 +38,14 @@ const Chatbot: React.FC = () => {
     {
       role: 'assistant',
       content:
-        "Hello! I am your Autonomous Intelligence Assistant. Submit any research, company, market, or patent query—I will automatically understand your intent, dynamically select the most relevant tool/API, execute data retrieval, and analyze the results for you.",
+        "Hello! I am your AI Multi-Agent Intelligence Orchestrator. Submit any query—I will dynamically select and delegate tasks to specialized sub-agents (Research Intelligence Agent, Competitive Intelligence Agent), coordinate tool calls, and execute cross-agent analysis for you.",
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [expandedToolIndex, setExpandedToolIndex] = useState<number | null>(null);
-  const [loadingStep, setLoadingStep] = useState<string>('🧠 Analyzing query & intent...');
+  const [loadingStep, setLoadingStep] = useState<string>('🤖 AI Orchestrator analyzing query...');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -76,9 +61,10 @@ const Chatbot: React.FC = () => {
     let interval: any;
     if (isLoading) {
       const steps = [
-        '🧠 Analyzing query intent...',
-        '⚡ Dynamically selecting & calling relevant tool/API...',
-        '📊 Analyzing retrieved data & synthesizing results...'
+        '🤖 AI Orchestrator analyzing query intent...',
+        '🔬 Delegating to specialized sub-agents...',
+        '⚡ Executing tools & fetching multi-source data...',
+        '🌐 Performing cross-agent synthesis & analysis...'
       ];
       let stepIdx = 0;
       setLoadingStep(steps[0]);
@@ -131,6 +117,8 @@ const Chatbot: React.FC = () => {
         tool_used: data.tool_used,
         tool_params: data.tool_params,
         retrieved_data: data.retrieved_data,
+        agents_involved: data.agents_involved,
+        agent_activity: data.agent_activity,
         execution_time_ms: data.execution_time_ms
       };
 
@@ -165,10 +153,10 @@ const Chatbot: React.FC = () => {
   };
 
   const suggestedQuestions = [
-    "What are the latest news articles on AI chips?",
+    "Find recent research papers and patents related to AI medical diagnosis and explain the competitive impact.",
     "Find research papers on quantum transformer models",
-    "Analyze Tesla company financial info & competitors",
-    "Search database for high priority insights"
+    "Search patent filings for low-latency interconnects",
+    "Analyze Tesla company financial info & competitors"
   ];
 
   return (
@@ -178,35 +166,35 @@ const Chatbot: React.FC = () => {
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-full shadow-2xl hover:scale-105 transition-all z-50 flex items-center space-x-2"
-          title="Open AI Autonomous Assistant"
+          title="Open Multi-Agent Assistant"
         >
-          <Sparkles className="w-6 h-6 animate-pulse" />
-          <span className="font-semibold text-sm pr-1">AI Agent</span>
+          <Workflow className="w-6 h-6 animate-pulse" />
+          <span className="font-semibold text-sm pr-1">Multi-Agent AI</span>
         </button>
       )}
 
       {/* Main Chat Window */}
       {isOpen && (
         <div
-          className={`fixed bottom-6 right-6 w-[440px] max-w-[92vw] bg-white rounded-2xl shadow-2xl z-50 flex flex-col transition-all border border-gray-100 ${
-            isMinimized ? 'h-14 overflow-hidden' : 'h-[620px]'
+          className={`fixed bottom-6 right-6 w-[480px] max-w-[94vw] bg-white rounded-2xl shadow-2xl z-50 flex flex-col transition-all border border-gray-100 ${
+            isMinimized ? 'h-14 overflow-hidden' : 'h-[640px]'
           }`}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 text-white p-3.5 rounded-t-2xl flex items-center justify-between shadow-md">
+          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white p-3.5 rounded-t-2xl flex items-center justify-between shadow-md">
             <div className="flex items-center space-x-2.5">
               <div className="p-1.5 bg-blue-500/20 rounded-lg border border-blue-400/30">
-                <Cpu className="w-5 h-5 text-blue-400 animate-pulse" />
+                <Cpu className="w-5 h-5 text-cyan-400 animate-pulse" />
               </div>
               <div>
                 <h3 className="font-semibold text-sm leading-none flex items-center gap-1.5">
-                  Autonomous AI Agent
-                  <span className="bg-emerald-500/20 text-emerald-300 text-[10px] px-1.5 py-0.5 rounded-full border border-emerald-500/30">
-                    Dynamic Tools
+                  AI Multi-Agent System
+                  <span className="bg-indigo-500/30 text-indigo-200 text-[10px] px-2 py-0.5 rounded-full border border-indigo-400/30 font-medium">
+                    Orchestrated
                   </span>
                 </h3>
                 <p className="text-[11px] text-gray-300 mt-0.5">
-                  Auto query routing & multi-source analysis
+                  Research & Competitive Intelligence Agents
                 </p>
               </div>
             </div>
@@ -241,47 +229,74 @@ const Chatbot: React.FC = () => {
                     }`}
                   >
                     <div
-                      className={`max-w-[88%] p-3.5 rounded-2xl shadow-sm ${
+                      className={`max-w-[90%] p-3.5 rounded-2xl shadow-sm ${
                         message.role === 'user'
                           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-none'
                           : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none'
                       }`}
                     >
-                      {/* Tool Execution Card (if assistant used a tool) */}
-                      {message.role === 'assistant' && message.tool_used && (
-                        <div className="mb-3 p-2.5 bg-slate-50 border border-slate-200/70 rounded-xl">
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center space-x-1.5 font-medium text-slate-800">
-                              {getToolIcon(message.tool_used)}
-                              <span>Dynamically Called:</span>
-                              <span className="font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-[11px]">
-                                {message.tool_used}
-                              </span>
-                            </div>
+                      {/* Agent Activity Section (Sub-agent trace checklist) */}
+                      {message.role === 'assistant' && (message.agent_activity?.length || message.agents_involved?.length) ? (
+                        <div className="mb-3 p-3 bg-slate-900 text-slate-100 rounded-xl text-xs font-sans shadow-inner border border-slate-800">
+                          <div className="flex items-center justify-between font-semibold border-b border-slate-700/80 pb-1.5 mb-2 text-blue-400">
+                            <span className="flex items-center gap-1.5 text-[11px] font-mono tracking-wide uppercase">
+                              <Workflow className="w-3.5 h-3.5 text-cyan-400" />
+                              Agent Activity
+                            </span>
                             {message.execution_time_ms ? (
-                              <div className="flex items-center text-[10px] text-gray-400 font-mono">
-                                <Clock className="w-3 h-3 mr-0.5" />
+                              <span className="text-[10px] text-slate-400 font-mono flex items-center">
+                                <Clock className="w-3 h-3 mr-1" />
                                 {message.execution_time_ms}ms
-                              </div>
+                              </span>
                             ) : null}
                           </div>
 
-                          {/* Tool Parameters */}
-                          {message.tool_params && Object.keys(message.tool_params).length > 0 && (
-                            <div className="mt-1.5 text-[11px] text-slate-500 font-mono">
-                              Params: {JSON.stringify(message.tool_params)}
+                          {/* Steps Checklist */}
+                          <div className="space-y-1.5 text-[11px] font-medium">
+                            <div className="flex items-center text-emerald-400">
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+                              <span>Orchestrator selected</span>
                             </div>
-                          )}
 
-                          {/* Retrieved Data Accordion */}
+                            {message.agents_involved?.includes('Research Intelligence Agent') && (
+                              <div className="flex items-center text-purple-300">
+                                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-purple-400" />
+                                <span>Research Intelligence Agent</span>
+                              </div>
+                            )}
+
+                            {message.agents_involved?.includes('Competitive Intelligence Agent') && (
+                              <div className="flex items-center text-amber-300">
+                                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-amber-400" />
+                                <span>Competitive Intelligence Agent</span>
+                              </div>
+                            )}
+
+                            <div className="flex items-center text-slate-300">
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-emerald-400" />
+                              <span>Tools called ({message.tool_used || 'Domain Tools'})</span>
+                            </div>
+
+                            <div className="flex items-center text-slate-300">
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-emerald-400" />
+                              <span>Results retrieved</span>
+                            </div>
+
+                            <div className="flex items-center text-cyan-300">
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0 text-cyan-400" />
+                              <span>Cross-agent analysis completed</span>
+                            </div>
+                          </div>
+
+                          {/* Expandable Data Log */}
                           {message.retrieved_data && (
-                            <div className="mt-2 pt-2 border-t border-slate-200/60">
+                            <div className="mt-2.5 pt-2 border-t border-slate-800">
                               <button
                                 onClick={() => toggleToolExpand(index)}
-                                className="flex items-center justify-between w-full text-[11px] text-blue-600 hover:text-blue-800 font-medium"
+                                className="flex items-center justify-between w-full text-[10px] text-cyan-400 hover:text-cyan-300 font-mono"
                               >
                                 <span>
-                                  {expandedToolIndex === index ? 'Hide Retrieved Data' : 'View Retrieved Data Log'}
+                                  {expandedToolIndex === index ? 'Hide Sub-Agent Output Data' : 'View Sub-Agent Output Data'}
                                 </span>
                                 {expandedToolIndex === index ? (
                                   <ChevronUp className="w-3.5 h-3.5" />
@@ -291,14 +306,14 @@ const Chatbot: React.FC = () => {
                               </button>
 
                               {expandedToolIndex === index && (
-                                <pre className="mt-2 p-2 bg-slate-900 text-slate-200 text-[10px] font-mono rounded-lg overflow-x-auto max-h-40">
+                                <pre className="mt-2 p-2 bg-slate-950 text-slate-300 text-[10px] font-mono rounded-lg overflow-x-auto max-h-40 border border-slate-800">
                                   {JSON.stringify(message.retrieved_data, null, 2)}
                                 </pre>
                               )}
                             </div>
                           )}
                         </div>
-                      )}
+                      ) : null}
 
                       {/* Main Message Content */}
                       <div className="text-sm whitespace-pre-wrap leading-relaxed">
@@ -320,17 +335,17 @@ const Chatbot: React.FC = () => {
                   </div>
                 ))}
 
-                {/* Loading indicator with step updates */}
+                {/* Loading indicator with multi-agent step updates */}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-white border border-gray-100 p-3 rounded-2xl rounded-bl-none shadow-sm max-w-[85%]">
-                      <div className="flex items-center space-x-2">
+                    <div className="bg-slate-900 text-white border border-slate-800 p-3 rounded-2xl rounded-bl-none shadow-sm max-w-[90%]">
+                      <div className="flex items-center space-x-2.5">
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce delay-100"></div>
-                          <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce delay-200"></div>
+                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-100"></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce delay-200"></div>
                         </div>
-                        <span className="text-xs font-medium text-slate-700 animate-pulse">
+                        <span className="text-xs font-mono text-cyan-300 animate-pulse">
                           {loadingStep}
                         </span>
                       </div>
@@ -343,18 +358,18 @@ const Chatbot: React.FC = () => {
               {/* Suggested Questions */}
               {messages.length <= 2 && !isLoading && (
                 <div className="px-4 py-2 bg-white border-t border-gray-100">
-                  <p className="text-[11px] font-medium text-gray-500 mb-1.5 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-amber-500" />
-                    Try asking:
+                  <p className="text-[11px] font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    Multi-Agent Demo Queries:
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-col gap-1.5">
                     {suggestedQuestions.map((question, idx) => (
                       <button
                         key={idx}
                         onClick={() => setInputValue(question)}
-                        className="text-[11px] bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 px-2.5 py-1 rounded-full border border-slate-200/80 transition-colors text-left"
+                        className="text-[11px] bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 px-3 py-1.5 rounded-lg border border-slate-200/80 transition-colors text-left font-medium"
                       >
-                        {question}
+                        {idx === 0 ? "🔥 Multi-Agent: " : ""}{question}
                       </button>
                     ))}
                   </div>
@@ -369,7 +384,7 @@ const Chatbot: React.FC = () => {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Enter query (AI will select tool & analyze data)..."
+                    placeholder="Enter query for AI Multi-Agent System..."
                     className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-gray-400"
                     disabled={isLoading}
                   />

@@ -34,6 +34,8 @@ class ChatResponse(BaseModel):
     tool_used: Optional[str] = None
     tool_params: Optional[Dict[str, Any]] = None
     retrieved_data: Optional[Any] = None
+    agents_involved: Optional[List[str]] = []
+    agent_activity: Optional[List[Dict[str, Any]]] = []
     execution_time_ms: Optional[float] = 0.0
 
 class InsightStats(BaseModel):
@@ -44,7 +46,7 @@ class InsightStats(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"message": "Autonomous Agent API with Dynamic Tool Selection", "status": "operational"}
+    return {"message": "Multi-Agent Intelligence API with Orchestrator", "status": "operational"}
 
 @app.get("/api/insights/stats/summary")
 async def get_insights_stats():
@@ -69,11 +71,10 @@ async def get_tracking_configs():
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """
-    Autonomous Chatbot API:
-    - Auto understands query
-    - Dynamically selects most relevant tool/API
-    - Executes tool & analyzes retrieved data
-    - Returns final synthesized result + metadata
+    Multi-Agent Chatbot API:
+    - AI Orchestrator dynamically delegates to specialized agents
+    - Sub-agents invoke domain tools
+    - Performs cross-agent synthesis & returns Agent Activity trace
     """
     try:
         result = await agent_orchestrator.process_query(
@@ -85,15 +86,17 @@ async def chat(request: ChatRequest):
             tool_used=result.get("tool_used"),
             tool_params=result.get("tool_params"),
             retrieved_data=result.get("retrieved_data"),
+            agents_involved=result.get("agents_involved", []),
+            agent_activity=result.get("agent_activity", []),
             execution_time_ms=result.get("execution_time_ms", 0.0)
         )
     except Exception as e:
         print(f"Chat execution error: {str(e)}")
         return ChatResponse(
-            response=f"An error occurred while executing dynamic tool agent: {str(e)}"
+            response=f"An error occurred while executing multi-agent orchestrator: {str(e)}"
         )
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting Autonomous Agent Chatbot API...")
+    print("Starting Multi-Agent Intelligence Chatbot API...")
     uvicorn.run(app, host="0.0.0.0", port=8000)

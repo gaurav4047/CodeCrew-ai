@@ -19,16 +19,18 @@ class ChatResponse(BaseModel):
     tool_used: Optional[str] = None
     tool_params: Optional[Dict[str, Any]] = None
     retrieved_data: Optional[Any] = None
+    agents_involved: Optional[List[str]] = []
+    agent_activity: Optional[List[Dict[str, Any]]] = []
     execution_time_ms: Optional[float] = 0.0
 
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     """
-    Chat endpoint powered by Autonomous Agent Orchestrator:
-    - Analyzes query intent
-    - Dynamically selects & executes relevant tool (Web, News, Companies, Research, DB, Patents)
-    - Synthesizes & returns analytical response + tool execution metadata
+    Multi-Agent Chat endpoint powered by AI Orchestrator:
+    - Analyzes query intent and delegates to specialized sub-agents (Research Intelligence Agent, Competitive Intelligence Agent)
+    - Dynamically executes sub-agent tool pipelines
+    - Performs cross-agent analytical synthesis and returns step-by-step Agent Activity trace
     """
     try:
         result = await agent_orchestrator.process_query(
@@ -40,6 +42,8 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
             tool_used=result.get("tool_used"),
             tool_params=result.get("tool_params"),
             retrieved_data=result.get("retrieved_data"),
+            agents_involved=result.get("agents_involved", []),
+            agent_activity=result.get("agent_activity", []),
             execution_time_ms=result.get("execution_time_ms", 0.0)
         )
     except Exception as e:
