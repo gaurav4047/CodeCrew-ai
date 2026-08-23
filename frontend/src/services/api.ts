@@ -109,4 +109,63 @@ export const observabilityAPI = {
   },
 };
 
+export const evaluationAPI = {
+  getSummary: async () => {
+    const response = await api.get('/api/evaluation/summary');
+    return response.data;
+  },
+
+  getTestCases: async () => {
+    const response = await api.get('/api/evaluation/test-cases');
+    return response.data;
+  },
+
+  getTestCaseById: async (testId: string) => {
+    const response = await api.get(`/api/evaluation/test-cases/${testId}`);
+    return response.data;
+  },
+
+  createTestCase: async (data: any) => {
+    const response = await api.post('/api/evaluation/test-cases', data);
+    return response.data;
+  },
+
+  deleteTestCase: async (testId: string) => {
+    const response = await api.delete(`/api/evaluation/test-cases/${testId}`);
+    return response.data;
+  },
+
+  runSingleTest: async (testId: string) => {
+    const response = await api.post(`/api/evaluation/run/${testId}`);
+    return response.data;
+  },
+
+  runSuite: async () => {
+    const response = await api.post('/api/evaluation/run-suite');
+    return response.data;
+  },
+
+  runRepeatedConsistency: async (testId: string, runsCount: number = 5) => {
+    const response = await api.post(`/api/evaluation/repeated-consistency/${testId}`, null, {
+      params: { runs_count: runsCount }
+    });
+    return response.data;
+  },
+
+  submitHumanReview: async (data: { test_id: string; evaluator: string; ratings: Record<string, number>; comment?: string }) => {
+    const response = await api.post('/api/evaluation/human-review', data);
+    return response.data;
+  },
+
+  getHumanReviews: async (testId: string) => {
+    const response = await api.get(`/api/evaluation/human-reviews/${testId}`);
+    return response.data;
+  },
+
+  getBaselineComparison: async () => {
+    const response = await api.get('/api/evaluation/baseline-comparison');
+    return response.data;
+  },
+};
+
 export default api;

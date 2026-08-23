@@ -20,7 +20,8 @@ import {
   Globe,
   ShieldCheck,
   Activity,
-  Layers
+  Layers,
+  RefreshCw
 } from 'lucide-react';
 import { useState } from 'react';
 import Chatbot from './Chatbot';
@@ -34,6 +35,10 @@ const Layout = () => {
     { name: 'AI Research', href: '/research', icon: Workflow },
     { name: 'Observability', href: '/observability', icon: Activity },
     { name: 'Trace Explorer', href: '/observability/traces', icon: Layers },
+    { name: 'Agent Evaluation', href: '/evaluation', icon: Award },
+    { name: 'Test Cases', href: '/evaluation/test-cases', icon: Layers },
+    { name: 'Repeated Runs', href: '/evaluation/runs', icon: RefreshCw },
+    { name: 'Baseline Compare', href: '/evaluation/compare', icon: TrendingUp },
     { name: 'Research Papers', href: '/papers', icon: Award },
     { name: 'Patents', href: '/patents', icon: FileCheck },
     { name: 'Competitors', href: '/competitors', icon: Building2 },
@@ -102,7 +107,7 @@ const Layout = () => {
                 key={item.name}
                 to={item.href}
                 className={`flex items-center px-3 py-2.5 text-xs font-medium rounded-xl transition-all ${
-                  location.pathname === item.href || (item.href === '/observability/traces' && location.pathname.startsWith('/observability/traces'))
+                  location.pathname === item.href || (item.href.startsWith('/evaluation') && location.pathname.startsWith('/evaluation'))
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md'
                     : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                 }`}

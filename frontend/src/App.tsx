@@ -4,6 +4,11 @@ import Dashboard from './pages/Dashboard';
 import ResearchWorkspace from './pages/ResearchWorkspace';
 import ObservabilityDashboard from './pages/ObservabilityDashboard';
 import TracesPage from './pages/TracesPage';
+import AgentEvaluationDashboard from './pages/AgentEvaluationDashboard';
+import TestCasesPage from './pages/TestCasesPage';
+import EvaluationRunsPage from './pages/EvaluationRunsPage';
+import EvaluationResultDetail from './pages/EvaluationResultDetail';
+import EvaluationBaselineCompare from './pages/EvaluationBaselineCompare';
 import ResearchPapersPage from './pages/ResearchPapersPage';
 import PatentsPage from './pages/PatentsPage';
 import CompetitorsPage from './pages/CompetitorsPage';
@@ -28,6 +33,11 @@ function App() {
           <Route path="observability" element={<ObservabilityDashboard />} />
           <Route path="observability/traces" element={<TracesPage />} />
           <Route path="observability/traces/:traceId" element={<TracesPage />} />
+          <Route path="evaluation" element={<AgentEvaluationDashboard />} />
+          <Route path="evaluation/test-cases" element={<TestCasesPage />} />
+          <Route path="evaluation/runs" element={<EvaluationRunsPage />} />
+          <Route path="evaluation/results/:id" element={<EvaluationResultDetail />} />
+          <Route path="evaluation/compare" element={<EvaluationBaselineCompare />} />
           <Route path="papers" element={<ResearchPapersPage />} />
           <Route path="patents" element={<PatentsPage />} />
           <Route path="competitors" element={<CompetitorsPage />} />

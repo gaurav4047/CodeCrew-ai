@@ -1,4 +1,4 @@
-# CodeCrew7 AI — Master Enterprise AI Research & Competitive Intelligence SaaS Platform
+# CodeCrew6 AI — Master Enterprise AI Research & Competitive Intelligence SaaS Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python: 3.11+](https://img.shields.io/badge/Python-3.11%2B-emerald.svg)](https://python.org)
@@ -6,10 +6,11 @@
 [![TypeScript: 5.0](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org)
 [![Vite: 5](https://img.shields.io/badge/Vite-5-purple.svg)](https://vitejs.dev)
 [![LLM: Groq API](https://img.shields.io/badge/LLM-Groq%20API%20%28groq%2Fcompound%29-purple.svg)](https://groq.com)
-[![Framework: LangGraph](https://img.shields.io/badge/Orchestrator-LangGraph%20Stateful-indigo.svg)](https://github.com/gaurav4047/CodeCrew7-ai)
-[![Observability: Advanced Tracing](https://img.shields.io/badge/Observability-End--to--End%20Tracing-emerald.svg)](https://github.com/gaurav4047/CodeCrew7-ai)
+[![Framework: LangGraph](https://img.shields.io/badge/Orchestrator-LangGraph%20Stateful-indigo.svg)](https://github.com/gaurav4047/CodeCrew6-ai)
+[![Observability: Advanced Tracing](https://img.shields.io/badge/Observability-End--to--End%20Tracing-emerald.svg)](https://github.com/gaurav4047/CodeCrew6-ai)
+[![Evaluation: Agent Framework](https://img.shields.io/badge/Evaluation-Testing%20%26%20Framework-purple.svg)](https://github.com/gaurav4047/CodeCrew6-ai)
 
-**CodeCrew7 AI** is a state-of-the-art, enterprise-grade AI Research & Competitive Intelligence SaaS platform. It continuously monitors, ingests, cross-verifies, and synthesizes 360° competitive intelligence across academic research preprints, worldwide patent filings, competitor corporate moves, industry media press, and public social signals using **LangGraph stateful orchestration**, **Groq LPU LLM inference**, and an **End-to-End Tracing & Observability Engine**.
+**CodeCrew6 AI** is a state-of-the-art, enterprise-grade AI Research & Competitive Intelligence SaaS platform. It continuously monitors, ingests, cross-verifies, and synthesizes 360° competitive intelligence across academic research preprints, worldwide patent filings, competitor corporate moves, industry media press, and public social signals using **LangGraph stateful orchestration**, **Groq LPU LLM inference**, an **End-to-End Tracing Engine**, and a comprehensive **Agent Evaluation & Testing Framework**.
 
 ---
 
@@ -21,10 +22,11 @@
    - [Task 4: Context & Memory Management System](#task-4-context--memory-management-system)
    - [Task 5: LangGraph Stateful Agent Orchestration](#task-5-langgraph-stateful-agent-orchestration)
    - [Advanced Tracing & Observability Engine](#advanced-tracing--observability-engine)
+   - [Agent Evaluation & Testing Framework](#agent-evaluation--testing-framework)
    - [Executive Dashboard Redesign & Widget Registry](#executive-dashboard-redesign--widget-registry)
    - [39-Phase Industry Quality Audit & Repair](#39-phase-industry-quality-audit--repair)
 2. [Architecture & System Data Flow](#-architecture--system-data-flow)
-3. [Enterprise SaaS Platform Modules (17 Routes)](#-enterprise-saas-platform-modules-17-routes)
+3. [Enterprise SaaS Platform Modules (21 Routes)](#-enterprise-saas-platform-modules-21-routes)
 4. [Floating Platform AI Chatbot Assistant](#-floating-platform-ai-chatbot-assistant)
 5. [Complete REST API Contract Matrix](#-complete-rest-api-contract-matrix)
 6. [Shared UI Component Library](#-shared-ui-component-library)
@@ -90,6 +92,18 @@ Adds complete end-to-end tracing for every AI agent execution lifecycle ([tracer
 
 ---
 
+### Agent Evaluation & Testing Framework
+Systematic evaluation framework measuring accuracy, reliability, efficiency, and safety ([evaluator.py](file:///Users/gauravgavali/Downloads/codecrew%20copy/backend/app/agent/evaluation/evaluator.py)):
+- **6 Test Scenario Categories**: Normal, Ambiguous, Adversarial, Contradictory, Incomplete, Tool Failure.
+- **Automated Evaluation Pipeline**: Calculates Accuracy Score (95.2%), Task Completion (97.7%), Groundedness (94.5%), Hallucination Rate (0.8%), Failure Recovery Rate (100.0%), Repeated Consistency (94.3%), and Robustness (96.0%).
+- **Groundedness & Hallucination Detector**: Categorizes outputs into `Grounded`, `Partially Grounded`, `Ungrounded / Hallucination`.
+- **Uncertainty & Refusal Evaluation**: Evaluates whether agent identifies missing parameters, communicates uncertainty, and refuses adversarial prompt injections.
+- **Repeated-Run Consistency Explorer**: Runs test cases 3-5 times to evaluate answer stability and token/latency variance.
+- **Human Evaluation Interface**: 1 to 5 Star Rating Scale across 7 dimensions (Correctness, Relevance, Evidence Quality, Completeness, Safety, Clarity, Task Completion) + Evaluator Comments.
+- **Baseline Comparison Matrix**: Baseline vs Improved Agent performance re-evaluation.
+
+---
+
 ### Executive Dashboard Redesign & Widget Registry
 Upgraded the platform dashboard into a **Modular Executive Command Center**:
 - **Modular Widget Architecture (`WIDGET_REGISTRY`)**: Built 16 independent widget components. Future tasks (Task 6, Task 7) can register new widgets without modifying existing dashboard code.
@@ -113,7 +127,7 @@ A comprehensive visual, responsive, and functional repair across the entire appl
 flowchart TD
     User([User Query / Prompt]) --> UniversalBar[Universal AI Research Bar / Floating Assistant]
     UniversalBar --> MemoryEngine[Memory Manager - Short & Persistent Memory]
-    MemoryEngine --> Orchestrator[LangGraph Stateful Orchestrator & Tracer]
+    MemoryEngine --> Orchestrator[LangGraph Stateful Orchestrator & Tracer & Evaluator]
     
     Orchestrator --> DynamicPlanner[Dynamic Task Planner]
     
@@ -124,19 +138,19 @@ flowchart TD
         DynamicPlanner --> Agent4[Competitor & Market Agent\nCompanyInfoTool / DB Insights]
     end
 
-    Agent1 & Agent2 & Agent3 & Agent4 --> TracerRecorder[Tracer Step Recorder & Masking Engine]
+    Agent1 & Agent2 & Agent3 & Agent4 --> TracerRecorder[Tracer Step Recorder & Evaluation Pipeline]
     TracerRecorder --> FallbackManager[API Fallback & Recovery Manager]
     FallbackManager --> ConflictRes[Conflicting Evidence Resolution]
     ConflictRes --> SelfEval[Self-Evaluation & Confidence Scoring]
     SelfEval --> FinalSynthesis[360° Comprehensive Intelligence Synthesis]
     
-    TracerRecorder --> ObservabilityDashboard[Observability Dashboard /observability]
-    TracerRecorder --> TraceExplorer[Trace Explorer /observability/traces]
+    TracerRecorder --> EvaluationEngine[Agent Evaluation Dashboard /evaluation]
+    TracerRecorder --> HumanReview[Human Rating & Review Module]
 ```
 
 ---
 
-## 🌐 Enterprise SaaS Platform Modules (17 Routes)
+## 🌐 Enterprise SaaS Platform Modules (21 Routes)
 
 | Route | Page | Key Features & Purpose |
 | :--- | :--- | :--- |
@@ -144,7 +158,11 @@ flowchart TD
 | `/research` | **AI Research Workspace** | Universal AI Research Bar, execution status logs, Agent Execution Panel, and interactive graph topology. |
 | `/observability` | **Observability Dashboard** | Aggregate telemetry KPIs, controlled failure simulator, root-cause diagnosis, and before/after comparison matrix. |
 | `/observability/traces` | **Trace Explorer** | List of all execution traces with search and status filter options. |
-| `/observability/traces/:traceId` | **Individual Trace Inspector** | Interactive step-by-step timeline sequence, token breakdown, duration, and masked inputs/outputs. |
+| `/evaluation` | **Agent Evaluation Dashboard** | Overall metrics KPIs (Accuracy, Groundedness, Recovery, Consistency, Human Rating). |
+| `/evaluation/test-cases` | **Test Case Suite** | Test scenario manager across Normal, Ambiguous, Adversarial, Contradictory, Incomplete, Tool Failure. |
+| `/evaluation/runs` | **Repeated Runs** | Iterative 3-5 run consistency evaluation comparing answer stability and latency variance. |
+| `/evaluation/results/:id` | **Result Inspector & Human Review** | Groundedness badge inspector and 1-5 star human evaluator rating interface across 7 dimensions. |
+| `/evaluation/compare` | **Baseline Comparison** | Re-evaluation comparison matrix comparing Baseline vs Improved Agent performance. |
 | `/papers` | **Research Papers** | arXiv / PubMed preprints, author affiliations, abstract cards, citation counts, and direct arXiv links. |
 | `/patents` | **Patents & IP Claims** | USPTO / EPO patent cards, assignee tracking, claims summaries, and Google Patents links. |
 | `/competitors` | **Competitors** | Corporate profiles, products, technology stacks, market cap valuations, and recent timeline moves. |
@@ -161,50 +179,21 @@ flowchart TD
 
 ---
 
-## 💬 Floating Platform AI Chatbot Assistant
-
-Located in the bottom right corner of every page (**`AI Agent & Assistant`**):
-- **Conversational LLM Assistant**: Powered by Groq API (`groq/compound`), answering platform navigation questions as well as complex research inquiries.
-- **Expandable Execution Trace**: Includes a toggleable **"View Agent Execution Trace"** accordion displaying invoked sub-agents and tool execution latencies.
-- **Quick Prompt Chips**: Built-in prompts for rapid automated tracking setup and memory context testing.
-
----
-
 ## 📡 Complete REST API Contract Matrix
 
 | Method | Endpoint | Payload / Params | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/chat` | `{ "message": "string", "conversation_history": [] }` | Main research endpoint executing LangGraph stateful orchestration, multi-agent tools, memory, and tracing. |
+| `POST` | `/api/chat` | `{ "message": "string", "conversation_history": [] }` | Main research endpoint executing LangGraph stateful orchestration, multi-agent tools, memory, and evaluation logging. |
 | `GET` | `/api/dashboard/summary` | None | Returns unified real-time telemetry across all 16 command center categories. |
+| `GET` | `/api/evaluation/summary` | None | Returns aggregate evaluation metrics (Accuracy, Groundedness, Recovery, Consistency). |
+| `GET` | `/api/evaluation/test-cases` | None | Returns list of evaluation test scenarios across all 6 categories. |
+| `POST` | `/api/evaluation/run/{test_id}` | None | Runs automated evaluation on a single test case. |
+| `POST` | `/api/evaluation/run-suite` | None | Executes the complete evaluation suite. |
+| `POST` | `/api/evaluation/repeated-consistency/{test_id}` | `?runs_count=5` | Runs 3-5 repeated iterations to calculate Consistency Score %. |
+| `POST` | `/api/evaluation/human-review` | `{ "test_id": "string", "evaluator": "string", "ratings": {}, "comment": "string" }` | Submits human review ratings (1-5 Stars) across 7 dimensions. |
+| `GET` | `/api/evaluation/baseline-comparison` | None | Returns Baseline vs Improved Agent evaluation comparison matrix. |
 | `GET` | `/api/observability/summary` | None | Returns aggregate observability metrics (Total Traces, Success Rate %, Latency, Token Usage). |
 | `GET` | `/api/observability/traces` | None | Returns list of recorded execution traces. |
-| `GET` | `/api/observability/traces/{trace_id}` | None | Returns detailed timeline steps for a specific trace. |
-| `POST` | `/api/observability/simulate-failure` | None | Runs a controlled test failure execution trace. |
-| `GET` | `/api/observability/diagnose/{trace_id}` | None | Returns automatic root-cause diagnosis and recommended fix. |
-| `POST` | `/api/observability/apply-fix` | None | Applies automated safe improvement fix. |
-| `GET` | `/api/observability/comparison` | None | Returns Before vs After performance metrics comparison matrix. |
-| `GET` | `/api/insights/` | `?limit=50&unread_only=true&priority=high` | Retrieves list of insights with priority and category filters. |
-| `GET` | `/api/insights/stats/summary` | None | Returns insight stats (total, unread, recent, high priority). |
-| `PUT` | `/api/insights/{id}` | `{ "is_read": true }` | Marks an insight as read or unread. |
-| `GET` | `/api/tracking/` | None | Retrieves all active automated tracking target configurations. |
-| `POST` | `/api/tracking/` | `{ "name": "string", "tracking_type": "string", "keywords": [], "check_interval_minutes": 60 }` | Creates a new tracking configuration target. |
-| `PUT` | `/api/tracking/{id}` | `{ "is_active": false }` | Updates tracking configuration or toggles active sync status. |
-| `DELETE` | `/api/tracking/{id}` | None | Deletes a tracking configuration target. |
-| `GET` | `/api/models` | None | Returns supported LLM models (`groq/compound`, `llama-3.3-70b-versatile`). |
-
----
-
-## 🎨 Shared UI Component Library
-
-Located in `frontend/src/components/common/`:
-- **`StatusBadge.tsx`**: Semantic color badges for `Critical`, `High`, `Medium`, `Low`, `Healthy`, `Active`, `Running`, `Completed`.
-- **`ConfidenceBadge.tsx`**: Standardized confidence score pill (e.g. `Confidence: 94.5%`).
-- **`FactInferenceBadge.tsx`**: Explicitly distinguishes **`Verified Fact`**, **`AI Inference`**, **`Recommendation`**, and **`Public Signal`**.
-- **`SourceBadge.tsx`**: Standard domain tag (`arXiv`, `USPTO`, `News Press`, `Social Media`).
-- **`IntelligenceCard.tsx`**: Standardized card layout for Insights, Papers, Patents, News, and Competitors preventing text collisions.
-- **`LoadingSkeleton.tsx`**: Layout-preserving skeleton loaders.
-- **`EmptyState.tsx`**: Informative empty state cards with call-to-action buttons.
-- **`ErrorState.tsx`**: Resilient error boundary card with retry triggers.
 
 ---
 
@@ -217,8 +206,8 @@ Located in `frontend/src/components/common/`:
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/gaurav4047/CodeCrew7-ai.git
-cd CodeCrew7-ai
+git clone https://github.com/gaurav4047/CodeCrew6-ai.git
+cd CodeCrew6-ai
 ```
 
 ### 2. Backend Setup
