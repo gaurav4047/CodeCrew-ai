@@ -51,10 +51,6 @@ class AgentOrchestrator:
         if groq_key and groq_key != "your_groq_api_key_here":
             return OpenAI(api_key=groq_key, base_url="https://api.groq.com/openai/v1")
 
-        xai_key = getattr(settings, "XAI_API_KEY", os.getenv("XAI_API_KEY"))
-        if xai_key and xai_key != "your_xai_api_key_here":
-            return OpenAI(api_key=xai_key, base_url="https://api.x.ai/v1")
-
         openai_key = os.getenv("OPENAI_API_KEY")
         if openai_key:
             return OpenAI(api_key=openai_key)
