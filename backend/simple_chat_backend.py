@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app.agent.agent_orchestrator import agent_orchestrator
 from app.agent.langgraph_orchestrator import langgraph_orchestrator
+from app.agent.tracing.tracer import trace_manager
 
 # Load environment variables
 load_dotenv()
@@ -42,6 +43,7 @@ class ChatResponse(BaseModel):
     agent_graph_nodes: Optional[List[Dict[str, Any]]] = []
     self_evaluation: Optional[Dict[str, Any]] = None
     execution_time_ms: Optional[float] = 0.0
+    trace_id: Optional[str] = None
 
 class InsightStats(BaseModel):
     total_insights: int = 4
@@ -108,7 +110,7 @@ in_memory_insights = [
 
 @app.get("/")
 async def root():
-    return {"message": "Enterprise LangGraph AI Intelligence API", "status": "operational"}
+    return {"message": "Enterprise LangGraph AI Intelligence API & Tracing Engine", "status": "operational"}
 
 @app.get("/api/dashboard/summary")
 async def get_dashboard_summary():
@@ -300,6 +302,49 @@ async def get_dashboard_summary():
         }
     }
 
+# --- Advanced Tracing & Observability API Endpoints ---
+
+@app.get("/api/observability/summary")
+async def get_observability_summary():
+    """Returns aggregate observability KPI metrics."""
+    return trace_manager.get_observability_summary()
+
+@app.get("/api/observability/traces")
+async def get_observability_traces():
+    """Returns list of recorded agent execution traces."""
+    return trace_manager.traces
+
+@app.get("/api/observability/traces/{trace_id}")
+async def get_trace_by_id(trace_id: str):
+    """Returns detailed timeline steps for a specific trace."""
+    trace = next((t for t in trace_manager.traces if t["trace_id"] == trace_id), None)
+    if not trace:
+        raise HTTPException(status_code=404, detail="Trace ID not found")
+    return trace
+
+@app.post("/api/observability/simulate-failure")
+async def simulate_failure():
+    """Runs a controlled test failure execution trace."""
+    trace = trace_manager.simulate_controlled_failure()
+    return trace
+
+@app.get("/api/observability/diagnose/{trace_id}")
+async def diagnose_trace_failure(trace_id: str):
+    """Generates automatic root-cause analysis and suggested fix for a trace."""
+    return trace_manager.diagnose_trace(trace_id)
+
+@app.post("/api/observability/apply-fix")
+async def apply_fix():
+    """Applies automated safe improvement fix to the tracing engine."""
+    return trace_manager.apply_automated_fix()
+
+@app.get("/api/observability/comparison")
+async def get_observability_comparison():
+    """Returns Before vs After performance metrics comparison matrix."""
+    return trace_manager.get_comparison_metrics()
+
+# --- Existing Endpoints ---
+
 @app.get("/api/insights/stats/summary")
 async def get_insights_stats():
     return InsightStats(
@@ -374,6 +419,7 @@ async def chat(request: ChatRequest):
     - Parallel Execution with Fallback Recovery & Conflicting Evidence Resolution
     - Self-Evaluation & Confidence Scoring (e.g. 94.5%)
     - Cross-agent synthesis & Memory update
+    - End-to-End Tracing & Observability
     """
     try:
         result = await langgraph_orchestrator.execute_graph(
@@ -391,7 +437,8 @@ async def chat(request: ChatRequest):
             execution_events=result.get("execution_events", []),
             agent_graph_nodes=result.get("agent_graph_nodes", []),
             self_evaluation=result.get("self_evaluation"),
-            execution_time_ms=result.get("execution_time_ms", 0.0)
+            execution_time_ms=result.get("execution_time_ms", 0.0),
+            trace_id=result.get("trace_id")
         )
     except Exception as e:
         print(f"Chat execution error: {str(e)}")
@@ -401,5 +448,5 @@ async def chat(request: ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting Enterprise LangGraph Multi-Agent Intelligence Chatbot API...")
+    print("Starting Enterprise LangGraph Multi-Agent Intelligence Chatbot API with Observability...")
     uvicorn.run(app, host="0.0.0.0", port=8000)

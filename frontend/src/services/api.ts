@@ -72,4 +72,41 @@ export const dashboardAPI = {
   },
 };
 
+export const observabilityAPI = {
+  getSummary: async () => {
+    const response = await api.get('/api/observability/summary');
+    return response.data;
+  },
+
+  getTraces: async () => {
+    const response = await api.get('/api/observability/traces');
+    return response.data;
+  },
+
+  getTraceById: async (traceId: string) => {
+    const response = await api.get(`/api/observability/traces/${traceId}`);
+    return response.data;
+  },
+
+  simulateFailure: async () => {
+    const response = await api.post('/api/observability/simulate-failure');
+    return response.data;
+  },
+
+  diagnoseFailure: async (traceId: string) => {
+    const response = await api.get(`/api/observability/diagnose/${traceId}`);
+    return response.data;
+  },
+
+  applyFix: async () => {
+    const response = await api.post('/api/observability/apply-fix');
+    return response.data;
+  },
+
+  getComparison: async () => {
+    const response = await api.get('/api/observability/comparison');
+    return response.data;
+  },
+};
+
 export default api;

@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import ResearchWorkspace from './pages/ResearchWorkspace';
+import ObservabilityDashboard from './pages/ObservabilityDashboard';
+import TracesPage from './pages/TracesPage';
 import ResearchPapersPage from './pages/ResearchPapersPage';
 import PatentsPage from './pages/PatentsPage';
 import CompetitorsPage from './pages/CompetitorsPage';
@@ -23,6 +25,9 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="research" element={<ResearchWorkspace />} />
+          <Route path="observability" element={<ObservabilityDashboard />} />
+          <Route path="observability/traces" element={<TracesPage />} />
+          <Route path="observability/traces/:traceId" element={<TracesPage />} />
           <Route path="papers" element={<ResearchPapersPage />} />
           <Route path="patents" element={<PatentsPage />} />
           <Route path="competitors" element={<CompetitorsPage />} />
